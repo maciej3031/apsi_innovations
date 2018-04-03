@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'signup',
     'django_extensions',
     'innovations',
     'socials',
@@ -57,7 +58,7 @@ ROOT_URLCONF = 'apsi_innovations.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'apsi_innovations/templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
