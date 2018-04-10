@@ -1,3 +1,86 @@
-h2{
-    color: #FCA205;
+/* Remove the navbar's default rounded borders and increase the bottom margin */
+.navbar {
+    margin-bottom: 0px;
+    border-radius: 0;
+}
+
+/* Remove the jumbotron's default bottom margin */
+.jumbotron {
+    margin-bottom: 0;
+    background: -moz-linear-gradient(deg, rgba(57,112,166,1) 0%, rgba(57,112,166,1) 2%, rgba(153,204,255,1) 48%, rgba(57,112,166,1) 100%);
+    background: -webkit-linear-gradient(deg, rgba(57,112,166,1) 0%, rgba(57,112,166,1) 2%, rgba(153,204,255,1) 48%, rgba(57,112,166,1) 100%);
+    background: -o-linear-gradient(deg, rgba(57,112,166,1) 0%, rgba(57,112,166,1) 2%, rgba(153,204,255,1) 48%, rgba(57,112,166,1) 100%);
+    background: -ms-linear-gradient(deg, rgba(57,112,166,1) 0%, rgba(57,112,166,1) 2%, rgba(153,204,255,1) 48%, rgba(57,112,166,1) 100%);
+    background: linear-gradient(90deg, rgba(57,112,166,1) 0%, rgba(57,112,166,1) 2%, rgba(153,204,255,1) 48%, rgba(57,112,166,1) 100%);
+}
+body {
+    background-image: url("http://www.wallpapersin4k.org/wp-content/uploads/2017/04/Open-Book-Wallpaper-17.jpg") ;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+/* Add a gray background color and some padding to the footer */
+footer {
+    background-color: #f2f2f2;
+    padding: 25px;
+}
+
+ /*Set height of the grid so .sidenav can be 100% (adjust as needed)*/
+/*.row.content {height: 5150px}*/
+
+/* Set gray background color and 100% height */
+/*.sidenav {*/
+    /*!*padding-top: 20px;*!*/
+    /*height: auto;*/
+    /*margin-top: 50px;*/
+    /*margin-left: 50px;*/
+    /*padding-top: 30px;*/
+    /*padding-bottom: 30px;*/
+    /*background:#99ccff;*/
+    /*color: #FFF;*/
+    /*text-shadow: none;*/
+    /*-webkit-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);*/
+    /*-moz-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);*/
+    /*box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);*/
+/*}*/
+
+
+/* On small screens, set height to 'auto' for sidenav and grid */
+@media screen and (max-width: 767px) {
+    .sidenav {
+        height: auto;
+        padding: 15px;
+        background:#99ccff;
+        color: #FFF;
+        padding-top: 30px;
+        margin-top: 50px;
+    }
+    .row.content {height:auto;}
+}
+
+
+.main-center{
+    margin-top: 50px;
+    padding-top: 30px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 30px;
+    background:#99ccff;
+    color: #FFF;
+    text-shadow: none;
+    -webkit-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);
+    -moz-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);
+    box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);
+
+}
+
+.panel-heading {
+    cursor: pointer;
+}
+.panel-title a {
+    display: block;
+    padding: 10px 15px;
+    margin: -10px -15px;
+    vertical-align: middle;
 }
