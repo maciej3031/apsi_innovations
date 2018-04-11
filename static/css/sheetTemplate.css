@@ -13,18 +13,17 @@
     background: -ms-linear-gradient(deg, rgba(57,112,166,1) 0%, rgba(57,112,166,1) 2%, rgba(153,204,255,1) 48%, rgba(57,112,166,1) 100%);
     background: linear-gradient(90deg, rgba(57,112,166,1) 0%, rgba(57,112,166,1) 2%, rgba(153,204,255,1) 48%, rgba(57,112,166,1) 100%);
 }
-body {
-    background-image: url("http://www.wallpapersin4k.org/wp-content/uploads/2017/04/Open-Book-Wallpaper-17.jpg") ;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-}
+
+
+/*body {*/
+    /*background-image: url("http://www.wallpapersin4k.org/wp-content/uploads/2017/04/Open-Book-Wallpaper-17.jpg") ;*/
+    /*-webkit-background-size: cover;*/
+    /*-moz-background-size: cover;*/
+    /*-o-background-size: cover;*/
+    /*background-size: cover;*/
+/*}*/
 /* Add a gray background color and some padding to the footer */
-footer {
-    background-color: #f2f2f2;
-    padding: 25px;
-}
+
 
  /*Set height of the grid so .sidenav can be 100% (adjust as needed)*/
 /*.row.content {height: 5150px}*/
@@ -60,19 +59,27 @@ footer {
 }
 
 
+/*.main-center{*/
+    /*margin-top: 50px;*/
+    /*padding-top: 30px;*/
+    /*padding-left: 30px;*/
+    /*padding-right: 30px;*/
+    /*padding-bottom: 30px;*/
+    /*background:#99ccff;*/
+    /*color: #FFF;*/
+    /*text-shadow: none;*/
+    /*-webkit-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);*/
+    /*-moz-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);*/
+    /*box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);*/
+
+/*}*/
+
 .main-center{
     margin-top: 50px;
     padding-top: 30px;
     padding-left: 30px;
     padding-right: 30px;
     padding-bottom: 30px;
-    background:#99ccff;
-    color: #FFF;
-    text-shadow: none;
-    -webkit-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);
-    -moz-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);
-    box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.31);
-
 }
 
 .panel-heading {
