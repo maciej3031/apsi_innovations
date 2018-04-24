@@ -8,6 +8,7 @@ class Innovation(models.Model):
         BLOCKED = 'blocked'
         REJECTED = 'rejected'
         SUSPENDED = 'suspended'
+        VOTING = 'voting'
         IN_REPLENISHMENT = 'in_replenishment'
         PENDING = 'pending'
 

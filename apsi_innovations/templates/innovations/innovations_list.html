@@ -3,15 +3,16 @@
 {% block content %}
 
     {% for innovation in innovations %}
-        {% if request.user|has_group:"administrators" %}
-            <a href="/innovations/set_status/{{ innovation.id }}/blocked">BLOCK</a>
-        {% endif %}
         {% comment %}
         In the future lines below should be replaced with dedicated decision form (including status substantiation)
         {% endcomment %}
-        {% if request.user|has_group:"committee_members" %}
+        {% if request.user|has_group:"committee_members" or request.user|has_group:"administrators" %}
             <a href="/innovations/set_status/{{ innovation.id }}/accepted">ACCEPT</a>
             <a href="/innovations/set_status/{{ innovation.id }}/rejected">REJECT</a>
+            <a href="/innovations/set_status/{{ innovation.id }}/blocked">BLOCK</a>
+            <a href="/innovations/set_status/{{ innovation.id }}/voting">MOVE TO VOTING</a>
+            <a href="/innovations/set_status/{{ innovation.id }}/suspended">SUSPEND</a>
+            <a href="/innovations/set_status/{{ innovation.id }}/in_replenishment">REPLENISHMENT NEEDED</a>
         {% endif %}
         {% comment %} Here should be also a ref to voting form {% endcomment %}
         {% if request.user|has_group:"students" or request.user|has_group:"employees" %}
