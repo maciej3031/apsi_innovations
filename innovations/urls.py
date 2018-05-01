@@ -1,12 +1,11 @@
-from django.urls import path
+from django.urls import path, re_path
 from django.views.generic import TemplateView
 
-from innovations.views import with_status, single, set_status, my_innovations
+from innovations.views import single, set_status, filtered
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name="innovations/innovations_home.html")),
-    path('with_status/<str:status>', with_status, name='with_status'),
-    path('my_innovations', my_innovations, name='my_innovations'),
-    path('single/<int:id>', single, name='single'),
-    path('set_status/<int:id>/<str:status>', set_status, name='set_status'),
+    re_path('^filtered/', filtered, name='filtered'),
+    path('single/<int:id>/', single, name='single'),
+    path('set_status/<int:id>/<str:status>/', set_status, name='set_status'),
 ]

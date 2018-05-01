@@ -1,9 +1,11 @@
+from enum import Enum
+
 from django.contrib.auth.models import User
 from django.db import models
 
 
 class Innovation(models.Model):
-    class Status:
+    class Status(Enum):
         ACCEPTED = 'accepted'
         BLOCKED = 'blocked'
         REJECTED = 'rejected'
