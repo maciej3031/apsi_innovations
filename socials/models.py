@@ -1,8 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from innovations.models import BaseAttachment, BaseUrl
-
 
 class SocialPost(models.Model):
     class Meta:
@@ -14,19 +12,21 @@ class SocialPost(models.Model):
     issuer = models.ForeignKey(User, related_name='social_posts', on_delete=models.deletion.CASCADE)
 
 
-class SocialPostUrl(BaseUrl):
+class SocialPostUrl(models.Model):
     class Meta:
         verbose_name = "Post Url"
         verbose_name_plural = "Post Urls"
 
+    url = models.URLField()
     post = models.ForeignKey(SocialPost, related_name='urls', on_delete=models.deletion.CASCADE)
 
 
-class SocialPostAttachment(BaseAttachment):
+class SocialPostAttachment(models.Model):
     class Meta:
         verbose_name = "Post Attachment"
         verbose_name_plural = "Post Attachments"
 
+    file = models.FileField(upload_to='attachments/', null=True)
     post = models.ForeignKey(SocialPost, related_name='attachments', on_delete=models.deletion.CASCADE)
 
 

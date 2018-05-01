@@ -1,9 +1,13 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.messages.views import SuccessMessageMixin
+from django.db import transaction
 from django.http import Http404
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import CreateView
 
-from innovations.models import Innovation
+from innovations.forms import InnovationAddForm
+from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment
 from signup.groups import administrators, committee_members, in_groups
 
 
@@ -55,3 +59,24 @@ def is_confidential(status):
 
 def has_confidential_access(user):
     return in_groups(user, [committee_members, administrators])
+
+
+class InnovationAddView(SuccessMessageMixin, CreateView):
+    template_name = 'add_innovation.html'
+    form_class = InnovationAddForm
+    success_url = '/'
+    success_message = "%(subject)s was created successfully"
+
+    @transaction.atomic
+    def form_valid(self, form):
+        form.instance.issuer = self.request.user
+        form.instance.save()
+
+        keywords = [Keyword(keyword=x.strip(), innovation=form.instance) for x in
+                    form.cleaned_data['keywords'].split(',')]
+        Keyword.objects.bulk_create(keywords)
+
+        InnovationUrl.objects.create(url=form.cleaned_data['url'], innovation=form.instance)
+        InnovationAttachment.objects.create(file=form.cleaned_data['attachment'], innovation=form.instance)
+
+        return super().form_valid(form)
