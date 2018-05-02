@@ -14,7 +14,7 @@ from signup.groups import administrators, committee_members, in_groups
 @login_required
 def filtered(request):
     owner_id = request.user.id if str(request.user.id) in request.GET.getlist("issuer") else None
-    all_statuses = [status.value for status in Innovation.Status]
+    all_statuses = all_innovation_statuses()
     kwargs = {"{}__in".format(key): request.GET.getlist(key) for key in request.GET}
     if owner_id:
         kwargs["issuer__in"].remove(str(owner_id))
@@ -53,12 +53,19 @@ def is_forbidden(status, user):
 
 def is_confidential(status):
     confidential_statueses = [Innovation.Status.BLOCKED, Innovation.Status.PENDING, Innovation.Status.IN_REPLENISHMENT]
-    confidential_statueses += [status.value for status in confidential_statueses]
     return status in confidential_statueses
 
 
 def has_confidential_access(user):
     return in_groups(user, [committee_members, administrators])
+
+
+def all_innovation_statuses():
+    return [
+        getattr(Innovation.Status, status)
+        for status in dir(Innovation.Status)
+        if type(status) is str and not status.startswith("__")
+    ]
 
 
 class InnovationAddView(SuccessMessageMixin, CreateView):

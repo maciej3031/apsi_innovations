@@ -5,7 +5,7 @@ from django.db import models
 
 
 class Innovation(models.Model):
-    class Status(Enum):
+    class Status():
         ACCEPTED = 'accepted'
         BLOCKED = 'blocked'
         REJECTED = 'rejected'
@@ -13,9 +13,6 @@ class Innovation(models.Model):
         IN_REPLENISHMENT = 'in_replenishment'
         PENDING = 'pending'
         VOTING = 'voting'
-
-        def __str__(self):
-            return self.value
 
     STATUS_CHOICES = (
         (Status.ACCEPTED, 'Accepted'),
