@@ -11,23 +11,45 @@ from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAtt
 from signup.groups import administrators, committee_members, in_groups
 
 
+class InnovationAddView(SuccessMessageMixin, CreateView):
+    template_name = 'add_innovation.html'
+    form_class = InnovationAddForm
+    success_url = '/'
+    success_message = "%(subject)s was created successfully"
+
+    @transaction.atomic
+    def form_valid(self, form):
+        form.instance.issuer = self.request.user
+        form.instance.save()
+
+        keywords = [Keyword(keyword=x.strip(), innovation=form.instance) for x in
+                    form.cleaned_data['keywords'].split(',')]
+        Keyword.objects.bulk_create(keywords)
+
+        InnovationUrl.objects.create(url=form.cleaned_data['url'], innovation=form.instance)
+        InnovationAttachment.objects.create(file=form.cleaned_data['attachment'], innovation=form.instance)
+
+        return super().form_valid(form)
+
+
 @login_required
-def filtered(request):
-    owner_id = request.user.id if str(request.user.id) in request.GET.getlist("issuer") else None
-    all_statuses = all_innovation_statuses()
-    kwargs = {"{}__in".format(key): request.GET.getlist(key) for key in request.GET}
-    if owner_id:
-        kwargs["issuer__in"].remove(str(owner_id))
-    kwargs["status__in"] = [
-        status for status
-        in kwargs.get("status__in", all_statuses)
-        if not is_forbidden(status, request.user)
-    ]
-    innovations = Innovation.objects.filter(**kwargs)
-    if owner_id:
-        kwargs["status__in"] = request.GET.getlist("status", default=all_statuses)
-        kwargs["issuer__in"] = [str(owner_id)]
-        innovations |= Innovation.objects.filter(**kwargs)
+def my_innovations(request):
+    innovations = Innovation.objects.filter(issuer=request.user)
+    status = request.GET.get('status')
+    if status is not None:
+        innovations = innovations.filter(status=status)
+    return render(request, "innovations/innovations_list.html", {"innovations": innovations})
+
+
+@login_required
+def innovations(request):
+    user = request.user
+    innovations = Innovation.objects.all()
+    status = request.GET.get('status')
+    if status is not None:
+        innovations = innovations.filter(status=status)
+    if not has_confidential_access(user):
+        innovations = innovations.exclude(status__in=get_confidential_statuses())
     return render(request, "innovations/innovations_list.html", {"innovations": innovations})
 
 
@@ -52,8 +74,11 @@ def is_forbidden(status, user):
 
 
 def is_confidential(status):
-    confidential_statueses = [Innovation.Status.BLOCKED, Innovation.Status.PENDING, Innovation.Status.IN_REPLENISHMENT]
-    return status in confidential_statueses
+    return status in get_confidential_statuses()
+
+
+def get_confidential_statuses():
+    return [Innovation.Status.BLOCKED, Innovation.Status.PENDING, Innovation.Status.IN_REPLENISHMENT]
 
 
 def has_confidential_access(user):
@@ -66,24 +91,3 @@ def all_innovation_statuses():
         for status in dir(Innovation.Status)
         if type(status) is str and not status.startswith("__")
     ]
-
-
-class InnovationAddView(SuccessMessageMixin, CreateView):
-    template_name = 'add_innovation.html'
-    form_class = InnovationAddForm
-    success_url = '/'
-    success_message = "%(subject)s was created successfully"
-
-    @transaction.atomic
-    def form_valid(self, form):
-        form.instance.issuer = self.request.user
-        form.instance.save()
-
-        keywords = [Keyword(keyword=x.strip(), innovation=form.instance) for x in
-                    form.cleaned_data['keywords'].split(',')]
-        Keyword.objects.bulk_create(keywords)
-
-        InnovationUrl.objects.create(url=form.cleaned_data['url'], innovation=form.instance)
-        InnovationAttachment.objects.create(file=form.cleaned_data['attachment'], innovation=form.instance)
-
-        return super().form_valid(form)
