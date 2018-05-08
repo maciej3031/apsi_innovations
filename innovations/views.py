@@ -89,5 +89,5 @@ def all_innovation_statuses():
     return [
         getattr(Innovation.Status, status)
         for status in dir(Innovation.Status)
-        if type(status) is str and not status.startswith("__")
+        if isinstance(status, str) and not status.startswith("__")
     ]
