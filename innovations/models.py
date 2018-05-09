@@ -23,7 +23,7 @@ class Innovation(models.Model):
     )
 
     subject = models.CharField(max_length=128)
-    description = models.CharField(max_length=1024)
+    description = models.TextField(max_length=1024)
     assumptions = models.CharField(max_length=1024)
     benefits = models.CharField(max_length=1024)
     costs = models.CharField(max_length=1024)
