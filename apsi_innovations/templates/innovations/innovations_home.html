@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load user_tags %}
+{% block content %}
+
+    {% if request.user|has_group:"committee_members" or request.user|has_group:"administrators" %}
+        <a href="/innovations/innovations/?status=blocked">BLOCKED</a> <BR>
+        <a href="/innovations/innovations/?status=suspended">SUSPENDED</a> <BR>
+        <a href="/innovations/innovations/?status=in_replenishment">IN REPLENISHMENT</a> <BR>
+    {% endif %}
+
+    <a href="/innovations/innovations/?status=accepted">ACCEPTED</a> <BR>
+    <a href="/innovations/innovations/?status=rejected">REJECTED</a> <BR>
+    <a href="/innovations/innovations/?status=voting">IN VOTING</a> <BR>
+    <a href="/innovations/my_innovations//">MY INNOVATIONS</a> <BR>
+    <a href="/innovations/innovations//">ALL</a> <BR>
+
+{% endblock %}
+
