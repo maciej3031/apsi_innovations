@@ -4,10 +4,12 @@ from django.db import transaction
 from django.http import Http404
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.decorators import method_decorator
+from django.utils.timezone import now
 from django.views.generic import CreateView
 
-from innovations.forms import InnovationAddForm
-from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment
+from innovations.forms import InnovationAddForm, ReportViolationForm
+from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, ViolationReport
 from signup.groups import administrators, committee_members, in_groups
 
 
@@ -29,6 +31,20 @@ class InnovationAddView(SuccessMessageMixin, CreateView):
         InnovationUrl.objects.create(url=form.cleaned_data['url'], innovation=form.instance)
         InnovationAttachment.objects.create(file=form.cleaned_data['attachment'], innovation=form.instance)
 
+        return super().form_valid(form)
+
+
+@method_decorator(login_required, name='dispatch')
+class ReportViolationView(SuccessMessageMixin, CreateView):
+    template_name = 'innovations/report_violation.html'
+    form_class = ReportViolationForm
+    success_url = '/'
+    success_message = "Violation has been reported. Thank you for your engagement."
+
+    @transaction.atomic
+    def form_valid(self, form):
+        form.instance.issuer = self.request.user
+        form.instance.innovation = Innovation.objects.get(id=self.kwargs['id'])
         return super().form_valid(form)
 
 
@@ -64,9 +80,32 @@ def single(request, id):
 @login_required
 def set_status(request, id, status):
     if not has_confidential_access(request.user):
-        raise render(request, "permission_denied.html")
+        return render(request, "permission_denied.html")
     Innovation.objects.get(id=id).update(status=status)
     return redirect("single", id=id)
+
+
+@login_required
+def reported_violations(request):
+    if not has_confidential_access(request.user):
+        return render(request, "permission_denied.html")
+    violations = ViolationReport.objects.filter(closing_date=None)
+    return render(request, "innovations/reported_violations.html", {"violations": violations})
+
+
+@login_required
+@transaction.atomic
+def finish_violation_report(request):
+    if not has_confidential_access(request.user):
+        raise render(request, "permission_denied.html")
+    action = request.GET.get("action")
+    violation_report = ViolationReport.objects.get(id=int(request.GET.get("id")))
+    if action == "accept":
+        violation_report.innovation.status = Innovation.Status.BLOCKED
+        violation_report.innovation.save()
+    violation_report.closing_date = now()
+    violation_report.save()
+    return redirect("reported_violations")
 
 
 def is_forbidden(status, user):
