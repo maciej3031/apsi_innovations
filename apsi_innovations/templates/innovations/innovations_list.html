@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load user_tags %}
+{% load innovation_tags %}
 {% block content %}
 
     {% for innovation in innovations %}
@@ -14,12 +15,19 @@
             <a href="/innovations/set_status/{{ innovation.id }}/suspended">SUSPEND</a>
             <a href="/innovations/set_status/{{ innovation.id }}/in_replenishment">REPLENISHMENT NEEDED</a>
         {% endif %}
-        {% comment %} Here should be also a ref to voting form {% endcomment %}
         {% if request.user|has_group:"students" or request.user|has_group:"employees" %}
             <div> Student can see everything</div>
         {% endif %}
         <h2>{{ innovation.subject }}</h2>
-        <h3>STATUS: {{ innovation.status }}</h3>
+        {% if request.user|has_group:"students" %}
+            <h3>STATUS: {{ innovation.status }}</h3>
+        {% endif %}
+        {% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight  %}
+            {% if innovation|has_status:"voting" %}
+                {% comment %} Here should be voting button {% endcomment %}
+                <a href="/innovations/vote/{{ innovation.id }}/">VOTE</a>
+            {% endif %}
+        {% endif %}
         <h3>Description</h3>
         {{ innovation.description }}<br>
         <h3>Assumptions</h3>
@@ -29,6 +37,7 @@
         <h3>Costs</h3>
         {{ innovation.costs }}<br>
         <hr>
+
     {% endfor %}
 
 {% endblock %}

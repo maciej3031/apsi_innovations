@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load user_tags %}
+{% load innovation_tags %}
+{% block content %}
+
+{% comment %} Here should be good page title{% endcomment %}
+    <h2>INNOVATION VOTE</h2>
+    <form action="" method="post" enctype="multipart/form-data">
+    {% for innovation in innovations %}
+        {% csrf_token %}
+        <h2>{{ innovation.subject }}</h2>
+        {{ innovation.description }}<br>
+    {% endfor %}
+
+    </form>
+{% endblock %}
+
+
