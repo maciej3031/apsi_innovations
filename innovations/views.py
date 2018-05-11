@@ -76,7 +76,7 @@ def vote(request, id):
     if has_voting_access(request.user, innovation):
         if request.method == 'GET':
             form = GradeForm()
-            return render(request, "innovations/voting.html", {"form": [form]})
+            return render(request, "innovations/voting.html", {"form": form})
         if request.method == 'POST':
             form = GradeForm(data=request.POST)
             if form.is_valid():
