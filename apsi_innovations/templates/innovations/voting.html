@@ -1,13 +1,15 @@
 {% extends 'base.html' %}
 {% load user_tags %}
 {% load innovation_tags %}
+{% load bootstrap_tags %}
 {% block content %}
 
 {% comment %} Here should be good page title{% endcomment %}
 <h2>INNOVATION VOTE</h2>
 <form action="" method="POST">
     {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit" />
+    {{ form|as_bootstrap }}
+    <button type="submit" class="btn btn-primary">Submit</button>
+
 </form>
 {% endblock %}
