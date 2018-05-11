@@ -71,8 +71,9 @@ def set_status(request, id, status):
 
 @login_required
 def vote(request, id):
-    #TODO: zapewnić jednokrotne głosowanie
     innovation = get_object_or_404(Innovation, id=id)
+    if get_previous_vote(id, request.user):
+        raise render(request, "voted_denied.html")
     if has_voting_access(request.user, innovation):
         if request.method == 'GET':
             form = GradeForm()
@@ -81,7 +82,8 @@ def vote(request, id):
             form = GradeForm(data=request.POST)
             if form.is_valid():
                 Grade.objects.create(user=request.user, innovation_id=id,
-                                     description=form.cleaned_data('description'), grade=form.cleaned_data('grade'))
+                                     description=form.cleaned_data.get('description'),
+                                     value=form.cleaned_data.get('value'))
             return redirect("single", id=id)
     else:
         raise render(request, "permission_denied.html")
@@ -103,11 +105,17 @@ def has_confidential_access(user):
     return in_groups(user, [committee_members, administrators])
 
 
+def get_previous_vote(innovation_id, user_id):
+    try:
+        return Grade.objects.get(innovation_id=innovation_id, user_id=user_id)
+    except Grade.DoesNotExist:
+        return None
+
+
 def has_voting_access(user, innovation):
     has_voting_status = innovation.status in [Innovation.Status.VOTING]
     has_voting_privileges = (in_groups(user, [students]) and innovation.student_grade_weight) or \
                             (in_groups(user, [committee_members]) and innovation.employee_grade_weight)
-
     return has_voting_status and has_voting_privileges
 
 
