@@ -8,7 +8,7 @@ from django.views.generic import CreateView
 
 from innovations.forms import InnovationAddForm, GradeForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade
-from signup.groups import administrators, committee_members, in_groups, students
+from signup.groups import administrators, committee_members, in_groups, students, in_group
 
 
 class InnovationAddView(SuccessMessageMixin, CreateView):
@@ -81,9 +81,9 @@ def vote(request, id):
         if request.method == 'POST':
             form = GradeForm(data=request.POST)
             if form.is_valid():
-                Grade.objects.create(user=request.user, innovation_id=id,
-                                     description=form.cleaned_data.get('description'),
-                                     value=form.cleaned_data.get('value'))
+                form.instance.user = request.user
+                form.instance.innovation = innovation
+                form.instance.save()
             return redirect("single", id=id)
     else:
         return render(request, "permission_denied.html")
@@ -114,8 +114,8 @@ def get_previous_vote(innovation_id, user_id):
 
 def has_voting_access(user, innovation):
     has_voting_status = innovation.status in [Innovation.Status.VOTING]
-    has_voting_privileges = (in_groups(user, [students]) and innovation.student_grade_weight) or \
-                            (in_groups(user, [committee_members]) and innovation.employee_grade_weight)
+    has_voting_privileges = (in_group(user, students) and innovation.student_grade_weight) or \
+                            (in_group(user, committee_members) and innovation.employee_grade_weight)
     return has_voting_status and has_voting_privileges
 
 
