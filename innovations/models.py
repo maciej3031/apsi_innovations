@@ -67,3 +67,11 @@ class InnovationAttachment(models.Model):
 
     file = models.FileField(upload_to='attachments/', null=True)
     innovation = models.ForeignKey(Innovation, related_name='attachments', on_delete=models.deletion.CASCADE)
+
+
+class ViolationReport(models.Model):
+    substantiation = models.CharField(max_length=1024)
+    creation_date = models.DateTimeField(auto_now_add=True)
+    closing_date = models.DateTimeField(default=None, null=True, blank=True)
+    issuer = models.ForeignKey(User, related_name="violation_reports", on_delete=models.deletion.CASCADE)
+    innovation = models.ForeignKey(Innovation, related_name='violation_reports', on_delete=models.deletion.CASCADE)

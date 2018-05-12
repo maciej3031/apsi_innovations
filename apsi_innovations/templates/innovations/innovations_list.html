@@ -15,9 +15,8 @@
             <a href="/innovations/set_status/{{ innovation.id }}/suspended">SUSPEND</a>
             <a href="/innovations/set_status/{{ innovation.id }}/in_replenishment">REPLENISHMENT NEEDED</a>
         {% endif %}
-        {% if request.user|has_group:"students" or request.user|has_group:"employees" %}
-            <div> Student can see everything</div>
-        {% endif %}
+        <a href="/innovations/report_violation/{{ innovation.id }}">REPORT VIOLATION</a>
+
         <h2>{{ innovation.subject }}</h2>
         {% if request.user|has_group:"students" %}
             <h3>STATUS: {{ innovation.status }}</h3>
