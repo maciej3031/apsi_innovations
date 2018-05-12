@@ -3,7 +3,7 @@
 {% block content %}
 
     {% if request.user|has_group:"committee_members" or request.user|has_group:"administrators" %}
-        <a href="/innovations/innovations/reported_violations/">REPORTED VIOLATIONS</a> <BR>
+        <a href="/innovations/reported_violations/">REPORTED VIOLATIONS</a> <BR>
         <a href="/innovations/innovations/?status=blocked">BLOCKED</a> <BR>
         <a href="/innovations/innovations/?status=suspended">SUSPENDED</a> <BR>
         <a href="/innovations/innovations/?status=in_replenishment">IN REPLENISHMENT</a> <BR>
