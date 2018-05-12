@@ -6,9 +6,9 @@ from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import CreateView
 
-from innovations.forms import InnovationAddForm
-from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment
-from signup.groups import administrators, committee_members, in_groups
+from innovations.forms import InnovationAddForm, GradeForm
+from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade
+from signup.groups import administrators, committee_members, in_groups, students, in_group
 
 
 class InnovationAddView(SuccessMessageMixin, CreateView):
@@ -69,6 +69,26 @@ def set_status(request, id, status):
     return redirect("single", id=id)
 
 
+@login_required
+def vote(request, id):
+    innovation = get_object_or_404(Innovation, id=id)
+    if get_previous_vote(id, request.user):
+        return render(request, "voting_denied.html")
+    if has_voting_access(request.user, innovation):
+        if request.method == 'GET':
+            form = GradeForm()
+            return render(request, "innovations/voting.html", {"form": form})
+        if request.method == 'POST':
+            form = GradeForm(data=request.POST)
+            if form.is_valid():
+                form.instance.user = request.user
+                form.instance.innovation = innovation
+                form.instance.save()
+            return redirect("single", id=id)
+    else:
+        return render(request, "permission_denied.html")
+
+
 def is_forbidden(status, user):
     return is_confidential(status) and not has_confidential_access(user)
 
@@ -83,6 +103,20 @@ def get_confidential_statuses():
 
 def has_confidential_access(user):
     return in_groups(user, [committee_members, administrators])
+
+
+def get_previous_vote(innovation_id, user_id):
+    try:
+        return Grade.objects.get(innovation_id=innovation_id, user_id=user_id)
+    except Grade.DoesNotExist:
+        return None
+
+
+def has_voting_access(user, innovation):
+    has_voting_status = innovation.status in [Innovation.Status.VOTING]
+    has_voting_privileges = (in_group(user, students) and innovation.student_grade_weight) or \
+                            (in_group(user, committee_members) and innovation.employee_grade_weight)
+    return has_voting_status and has_voting_privileges
 
 
 def all_innovation_statuses():
