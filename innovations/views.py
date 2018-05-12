@@ -73,7 +73,7 @@ def set_status(request, id, status):
 def vote(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if get_previous_vote(id, request.user):
-        raise render(request, "voted_denied.html")
+        return render(request, "voting_denied.html")
     if has_voting_access(request.user, innovation):
         if request.method == 'GET':
             form = GradeForm()
@@ -86,7 +86,7 @@ def vote(request, id):
                                      value=form.cleaned_data.get('value'))
             return redirect("single", id=id)
     else:
-        raise render(request, "permission_denied.html")
+        return render(request, "permission_denied.html")
 
 
 def is_forbidden(status, user):
