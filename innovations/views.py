@@ -81,7 +81,7 @@ def single(request, id):
 def set_status(request, id, status):
     if not has_confidential_access(request.user):
         return render(request, "permission_denied.html")
-    Innovation.objects.get(id=id).update(status=status)
+    Innovation.objects.filter(id=id).update(status=status)
     return redirect("single", id=id)
 
 
