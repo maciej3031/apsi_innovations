@@ -97,7 +97,7 @@ def reported_violations(request):
 @transaction.atomic
 def finish_violation_report(request):
     if not has_confidential_access(request.user):
-        raise render(request, "permission_denied.html")
+        return render(request, "permission_denied.html")
     action = request.GET.get("action")
     violation_report = ViolationReport.objects.get(id=int(request.GET.get("id")))
     if action == "accept":
