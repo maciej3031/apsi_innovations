@@ -36,7 +36,6 @@ class InnovationAddView(SuccessMessageMixin, CreateView):
         return super().form_valid(form)
 
 
-@method_decorator(login_required, name='dispatch')
 class InnovationAppraiseView(SuccessMessageMixin, CreateView):
     template_name = 'innovations/appraise.html'
     form_class = AppraiseForm
@@ -148,11 +147,10 @@ def finish_violation_report(request):
 def set_status_substantiation(request, id, status_substantiation):
     if not has_confidential_access(request.user):
         raise render(request, "permission_denied.html")
-    Innovation.objects.get(id=id).update(status_substantiation=status_substantiation)
+    Innovation.objects.filter(id=id).update(status_substantiation=status_substantiation)
     return redirect("single", id=id)
 
 
-@login_required
 def appraise(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if has_appraise_access(request.user, innovation):
@@ -162,9 +160,11 @@ def appraise(request, id):
         if request.method == "POST":
             form = AppraiseForm(data=request.POST)
             if form.is_valid():
-                Innovation.status = set_status(request, id, form.cleaned_data.get('status'))
-                Innovation.status_substantiation = \
-                    set_status_substantiation(request, id, form.cleaned_data.get('status_substantiation'))
+                Innovation.objects.filter(id=id).update(status_substantiation=form.cleaned_data.get('status_substantiation'), status =form.cleaned_data.get('status') )
+                # innovation.status = set_status(request, id, form.cleaned_data.get('status'))
+                # innovation.status_substantiation = \
+                #     set_status_substantiation(request, id, form.cleaned_data.get('status_substantiation'))
+                # innovation.
             return redirect("single", id=id)
     else:
         return render(request, "permission_denied.html")
