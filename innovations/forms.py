@@ -1,6 +1,6 @@
 from django import forms
 
-from innovations.models import Innovation
+from innovations.models import Innovation, ViolationReport, Grade
 
 
 # TODO: url i attachment powinny umożliwiać dodanie więcej niż jednego elementu
@@ -19,3 +19,15 @@ class AppraiseForm(forms.ModelForm):
     class Meta:
         model = Innovation
         fields = ['status', 'status_substantiation']
+
+
+class ReportViolationForm(forms.ModelForm):
+    class Meta:
+        model = ViolationReport
+        fields = ['substantiation']
+
+
+class GradeForm(forms.ModelForm):
+    class Meta:
+        model = Grade
+        fields = ['value', 'description']

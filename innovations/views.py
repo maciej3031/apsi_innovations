@@ -4,8 +4,13 @@ from django.db import transaction
 from django.http import Http404
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.decorators import method_decorator
+from django.utils.timezone import now
 from django.views.generic import CreateView
 
+from innovations.forms import InnovationAddForm, GradeForm, ReportViolationForm
+from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
+from signup.groups import administrators, committee_members, in_groups, students, in_group
 from innovations.forms import InnovationAddForm, AppraiseForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment
 from signup.groups import administrators, committee_members, in_groups
@@ -37,6 +42,20 @@ class InnovationAppraiseView(SuccessMessageMixin, CreateView):
     form_class = AppraiseForm
     success_url = '/'
     success_message = "You appraise successfully. Thank you."
+
+    @transaction.atomic
+    def form_valid(self, form):
+        form.instance.issuer = self.request.user
+        form.instance.innovation = Innovation.objects.get(id=self.kwargs['id'])
+        return super().form_valid(form)
+
+
+@method_decorator(login_required, name='dispatch')
+class ReportViolationView(SuccessMessageMixin, CreateView):
+    template_name = 'innovations/report_violation.html'
+    form_class = ReportViolationForm
+    success_url = '/'
+    success_message = "Violation has been reported. Thank you for your engagement."
 
     @transaction.atomic
     def form_valid(self, form):
@@ -77,9 +96,52 @@ def single(request, id):
 @login_required
 def set_status(request, id, status):
     if not has_confidential_access(request.user):
-        raise render(request, "permission_denied.html")
-    Innovation.objects.get(id=id).update(status=status)
+        return render(request, "permission_denied.html")
+    Innovation.objects.filter(id=id).update(status=status)
     return redirect("single", id=id)
+
+
+@login_required
+def vote(request, id):
+    innovation = get_object_or_404(Innovation, id=id)
+    if get_previous_vote(id, request.user):
+        return render(request, "voting_denied.html")
+    if has_voting_access(request.user, innovation):
+        if request.method == 'GET':
+            form = GradeForm()
+            return render(request, "innovations/voting.html", {"form": form})
+        if request.method == 'POST':
+            form = GradeForm(data=request.POST)
+            if form.is_valid():
+                form.instance.user = request.user
+                form.instance.innovation = innovation
+                form.instance.save()
+            return redirect("single", id=id)
+    else:
+        return render(request, "permission_denied.html")
+
+
+@login_required
+def reported_violations(request):
+    if not has_confidential_access(request.user):
+        return render(request, "permission_denied.html")
+    violations = ViolationReport.objects.filter(closing_date=None)
+    return render(request, "innovations/reported_violations.html", {"violations": violations})
+
+
+@login_required
+@transaction.atomic
+def finish_violation_report(request):
+    if not has_confidential_access(request.user):
+        return render(request, "permission_denied.html")
+    action = request.GET.get("action")
+    violation_report = ViolationReport.objects.get(id=int(request.GET.get("id")))
+    if action == "accept":
+        violation_report.innovation.status = Innovation.Status.BLOCKED
+        violation_report.innovation.save()
+    violation_report.closing_date = now()
+    violation_report.save()
+    return redirect("reported_violations")
 
 
 @login_required
@@ -122,6 +184,20 @@ def get_confidential_statuses():
 
 def has_confidential_access(user):
     return in_groups(user, [committee_members, administrators])
+
+
+def get_previous_vote(innovation_id, user_id):
+    try:
+        return Grade.objects.get(innovation_id=innovation_id, user_id=user_id)
+    except Grade.DoesNotExist:
+        return None
+
+
+def has_voting_access(user, innovation):
+    has_voting_status = innovation.status in [Innovation.Status.VOTING]
+    has_voting_privileges = (in_group(user, students) and innovation.student_grade_weight) or \
+                            (in_group(user, committee_members) and innovation.employee_grade_weight)
+    return has_voting_status and has_voting_privileges
 
 
 def all_innovation_statuses():
