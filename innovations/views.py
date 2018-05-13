@@ -36,11 +36,12 @@ class InnovationAddView(SuccessMessageMixin, CreateView):
         return super().form_valid(form)
 
 
+@method_decorator(login_required, name='dispatch')
 class InnovationAppraiseView(SuccessMessageMixin, CreateView):
     template_name = 'innovations/appraise.html'
     form_class = AppraiseForm
     success_url = '/'
-    success_message = "You appraise successfully. Thank you."
+    success_message = "You appraised successfully. Thank you!"
 
     @transaction.atomic
     def form_valid(self, form):
@@ -151,7 +152,7 @@ def set_status_substantiation(request, id, status_substantiation):
     return redirect("single", id=id)
 
 
-# @login_required
+@login_required
 def appraise(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if has_appraise_access(request.user, innovation):
