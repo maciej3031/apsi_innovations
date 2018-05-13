@@ -13,6 +13,10 @@ from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAtt
 from signup.groups import administrators, committee_members, in_groups, students, in_group
 
 
+from django.http import HttpResponse
+from django.template import loader
+
+
 class InnovationAddView(SuccessMessageMixin, CreateView):
     template_name = 'add_innovation.html'
     form_class = InnovationAddForm
@@ -164,3 +168,34 @@ def all_innovation_statuses():
         for status in dir(Innovation.Status)
         if isinstance(status, str) and not status.startswith("__")
     ]
+	
+def innovation_list(request):
+	innovations = Innovation.objects.filter(status = 'pending').order_by('timestamp')
+	blocked = Innovation.objects.filter(status = 'blocked').order_by('timestamp')
+	approved = Innovation.objects.filter(status = 'approved').order_by('timestamp')
+	template = loader.get_template('innovation_list.html')
+	context = {
+		'innovations': innovations,
+		'blocked': blocked,
+		'approved': approved,
+		}
+	return HttpResponse(template.render(context, request))
+	
+def rejected_list(request):
+	innovations = Innovation.objects.filter(status='rejected').order_by('timestamp')
+	template = loader.get_template('innovation_list.html')
+	context = {
+		'innovations': innovations,
+		}
+	return HttpResponse(template.render(context, request))
+	
+def detail(request, idea_id):
+	template = loader.get_template('innovation_detail.html')
+	idea = Innovation.objects.filter(id=idea_id)
+	comments = Grade.objects.filter(innovation_id = idea_id)
+
+	context = {
+		'idea': idea,
+		'comments': comments,
+		}
+	return HttpResponse(template.render(context, request))
