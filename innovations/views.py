@@ -2,18 +2,17 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
 from django.http import Http404
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.views.generic import CreateView
 
-from innovations.forms import InnovationAddForm, GradeForm, ReportViolationForm
-from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
-from signup.groups import administrators, committee_members, in_groups, students, in_group
+from innovations.forms import GradeForm, ReportViolationForm
 from innovations.forms import InnovationAddForm, AppraiseForm
+from innovations.models import Grade, ViolationReport
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment
 from signup.groups import administrators, committee_members, in_groups
+from signup.groups import students, in_group
 
 
 class InnovationAddView(SuccessMessageMixin, CreateView):
