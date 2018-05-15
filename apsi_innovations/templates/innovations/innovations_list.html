@@ -26,6 +26,11 @@
                 <a href="/innovations/vote/{{ innovation.id }}/" class="btn btn-primary">VOTE</a>
             {% endif %}
         {% endif %}
+        {% if request.user|has_group:"committee_members" or request.user|has_group:"administrators" %}
+            {% if innovation|has_status:"voting" %}
+                <a href="/innovations/appraise/{{ innovation.id }}" class="btn btn-primary">APPRAISE</a>
+            {% endif %}
+        {% endif %}
         <h3>Description</h3>
         {{ innovation.description }}<br>
         <h3>Assumptions</h3>
