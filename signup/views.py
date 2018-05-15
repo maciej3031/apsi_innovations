@@ -13,7 +13,7 @@ def home(request):
 
 
 def account_inactive(request):
-    return render(request, 'account_inactive.html')
+    return render(request, 'registration/account_inactive.html')
 
 
 def signup(request):
@@ -29,4 +29,4 @@ def signup(request):
             return redirect('account_inactive')
     else:
         form = SignUpForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'registration/signup.html', {'form': form})

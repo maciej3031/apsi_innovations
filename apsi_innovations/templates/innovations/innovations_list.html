@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load user_tags %}
+{% load innovation_tags %}
+{% block content %}
+
+    {% for innovation in innovations %}
+        {% comment %}
+        In the future lines below should be replaced with dedicated decision form (including status substantiation)
+        {% endcomment %}
+        {% if request.user|has_group:"committee_members" or request.user|has_group:"administrators" %}
+            <a href="/innovations/set_status/{{ innovation.id }}/accepted">ACCEPT</a>
+            <a href="/innovations/set_status/{{ innovation.id }}/rejected">REJECT</a>
+            <a href="/innovations/set_status/{{ innovation.id }}/blocked">BLOCK</a>
+            <a href="/innovations/set_status/{{ innovation.id }}/voting">MOVE TO VOTING</a>
+            <a href="/innovations/set_status/{{ innovation.id }}/suspended">SUSPEND</a>
+            <a href="/innovations/set_status/{{ innovation.id }}/in_replenishment">REPLENISHMENT NEEDED</a>
+        {% endif %}
+        <a href="/innovations/report_violation/{{ innovation.id }}">REPORT VIOLATION</a>
+
+        <h2>{{ innovation.subject }}</h2>
+        {% if request.user|has_group:"students" %}
+            <h3>STATUS: {{ innovation.status }}</h3>
+        {% endif %}
+        {% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight  %}
+            {% if innovation|has_status:"voting" %}
+                <a href="/innovations/vote/{{ innovation.id }}/" class="btn btn-primary">VOTE</a>
+            {% endif %}
+        {% endif %}
+        <h3>Description</h3>
+        {{ innovation.description }}<br>
+        <h3>Assumptions</h3>
+        {{ innovation.assumptions }}<br>
+        <h3>Benefits</h3>
+        {{ innovation.benefits }}<br>
+        <h3>Costs</h3>
+        {{ innovation.costs }}<br>
+        <hr>
+
+    {% endfor %}
+
+{% endblock %}
+

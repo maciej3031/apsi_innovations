@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load user_tags %}
+{% block content %}
+
+    {% for violation in violations %}
+        <a href="/innovations/finish_violation_report/?action=accept&id={{ violation.id }}">ACCEPT REPORT</a>
+        <a href="/innovations/finish_violation_report/?action=reject&id={{ violation.id }}">REJECT REPORT</a>
+        <h2>Substantiation of report: {{ violation.substantiation }}</h2>
+        <h2>{{ violation.innovation.subject }}</h2>
+        <h3>STATUS: {{ violation.innovation.status }}</h3>
+        <h3>Description</h3>
+        {{ violation.innovation.description }}<br>
+        <h3>Assumptions</h3>
+        {{ violation.innovation.assumptions }}<br>
+        <h3>Benefits</h3>
+        {{ violation.innovation.benefits }}<br>
+        <h3>Costs</h3>
+        {{ violation.innovation.costs }}<br>
+        <hr>
+    {% endfor %}
+
+{% endblock %}
+
