@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load user_tags %}
+{% load innovation_tags %}
+{% block content %}
+
+    <h1>Innovations I reported: </h1>
+    {% for innovation in innovations %}
+        <h2>{{ innovation.subject }}</h2>
+        <h3>STATUS: {{ innovation.status }}</h3>
+        <h3>Description</h3>
+        {{ innovation.description }}<br>
+        <h3>Assumptions</h3>
+        {{ innovation.assumptions }}<br>
+        <h3>Benefits</h3>
+        {{ innovation.benefits }}<br>
+        <h3>Costs</h3>
+        {{ innovation.costs }}<br>
+        <hr>
+    {% endfor %}
+
+    <hr>
+    <hr>
+    <hr>
+
+    <h1>Posts I wrote: </h1>
+    {% for post in posts %}
+        <h3>{{ post.text }}</h3>
+        <h3>Added: {{ post.timestamp }}</h3>
+        <hr>
+    {% endfor %}
+
+    <hr>
+    <hr>
+    <hr>
+
+    <h1>Comments I wrote: </h1>
+    {% for comment in comments %}
+        <h3>{{ comment.text }}</h3>
+        <h3>Related to post: {{ comment.social_post.id }} <-- HERE WILL BE LINK</h3>
+        <hr>
+    {% endfor %}
+
+
+{% endblock %}
+
