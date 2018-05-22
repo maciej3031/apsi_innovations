@@ -161,10 +161,6 @@ def appraise(request, id):
             form = AppraiseForm(data=request.POST)
             if form.is_valid():
                 Innovation.objects.filter(id=id).update(status_substantiation=form.cleaned_data.get('status_substantiation'), status =form.cleaned_data.get('status') )
-                # innovation.status = set_status(request, id, form.cleaned_data.get('status'))
-                # innovation.status_substantiation = \
-                #     set_status_substantiation(request, id, form.cleaned_data.get('status_substantiation'))
-                # innovation.
             return redirect("single", id=id)
     else:
         return render(request, "permission_denied.html")
