@@ -18,9 +18,6 @@
         <a href="/innovations/report_violation/{{ innovation.id }}">REPORT VIOLATION</a>
 
         <h2>{{ innovation.subject }}</h2>
-        {% if request.user|has_group:"students" %}
-            <h3>STATUS: {{ innovation.status }}</h3>
-        {% endif %}
         {% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight  %}
             {% if innovation|has_status:"voting" %}
                 <a href="/innovations/vote/{{ innovation.id }}/" class="btn btn-primary">VOTE</a>
