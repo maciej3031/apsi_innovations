@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load bootstrap_tags %}
+{% load auth_extras %}
+{% block content %}
+{% if idea %}
+    {% for innovation in idea %}
+
+	<div class="panel panel-default">
+		<div class ="panel-heading"> 
+			{{ innovation.subject }}
+		</div>
+		<div class ="panel-body">
+				<p><h4>Description:</h4>
+				{{ innovation.description }}</p>
+				<p><h4>Assumptions:</h4>
+				{{ innovation.assumptions }}</p>
+				<p><h4>Benefits:</h4>
+				{{ innovation.benefits }}</p>	
+				<p><h4>Cost:</h4>
+				{{ innovation.costs }}</p>
+		</div>
+		<div class="panel-footer">
+			<button type="submit" class="btn btn-primary">Rate</button>
+			{% if request.user|has_group:"committee_members" %} 
+				<button type="submit" class="btn btn-success">Approve</button>
+				<button type="submit" class="btn btn-info">Ask for Details</button>
+				<button type="submit" class="btn btn-danger">Reject</button>
+			{% endif %}
+			{% if request.user|has_group:"administrators" %} 
+				<button type="submit" class="btn btn-warning pull-right">Change weights</button>
+				<button type="submit" class="btn btn-danger pull-right">Block</button>
+			{% endif %}
+		</div>
+	</div>
+
+
+	{% endfor %}
+	
+	<h3>Comments:</h3>
+	
+	{% if comments %}	
+
+		{% for grade in comments %}
+			<div class="panel panel-default">
+			<div class ="panel-heading"> 
+				Ocena: {{grade.value }}
+			</div>
+			<div class ="panel-body">
+				{{grade.description}}
+			</div>
+			</div>
+		{% endfor %}
+	
+	{% else %}
+	<p>No comments.</p>		
+	{% endif %}
+	
+
+{% else %}
+    <p>No innovation details.</p>
+{% endif %}
+{% endblock %}

@@ -22,11 +22,14 @@
         <div class="navbar-header">
             <a class="navbar-brand" href="#{% url 'home' %}">Home</a>
         </div>
-            <ul class="nav navbar-nav navbar-left">
+		    <ul class="nav navbar-nav navbar-left">
                 {% if user.is_authenticated %}
-                <li><a href="{% url 'add_innovation' %}">Add innovation</a></li>
-                {% endif %}
+				<li><a href="{% url 'innovation_list' %}">Innovation List</a></li>
+				<li><a href="{% url 'rejected_list' %}">Rejected List</a></li>
+        <li><a href="{% url 'add_innovation' %}">Add innovation</a></li>
+          {% endif %}
             </ul>
+      
             <ul class="nav navbar-nav navbar-right">
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span>logout</a></li>
