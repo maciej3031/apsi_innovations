@@ -16,5 +16,4 @@ urlpatterns = [
     path('reported_violations/', reported_violations, name='reported_violations'),
     path('finish_violation_report/', finish_violation_report, name='finish_violation_report'),
     path('student_employee_profile/', student_employee_profile, name='student_employee_profile'),
-
 ]
