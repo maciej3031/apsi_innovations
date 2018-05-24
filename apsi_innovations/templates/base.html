@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 {% load static %}
+{% load auth_extras %}
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -24,10 +25,13 @@
         </div>
 		    <ul class="nav navbar-nav navbar-left">
                 {% if user.is_authenticated %}
-				<li><a href="{% url 'innovation_list' %}">Innovation List</a></li>
-				<li><a href="{% url 'rejected_list' %}">Rejected List</a></li>
-        <li><a href="{% url 'add_innovation' %}">Add innovation</a></li>
-          {% endif %}
+					<li><a href="{% url 'innovation_list' %}">Innovation List</a></li>
+					<li><a href="{% url 'rejected_list' %}">Closed List</a></li>
+					<li><a href="{% url 'add_innovation' %}">Add innovation</a></li>
+				{% endif %}
+				{% if request.user|has_group:"administrators" or request.user|has_group:"committee_members"%}
+									<li><a href="{% url 'admin_list' %}">Manage ideas</a></li>
+				{% endif %}
             </ul>
       
             <ul class="nav navbar-nav navbar-right">

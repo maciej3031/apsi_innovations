@@ -4,35 +4,58 @@
 {% block content %}
 {% if idea %}
     {% for innovation in idea %}
+	
+		{% if innovation.status == "blocked" %}
+		
+			<h3>This idea has been blocked by an administrator.</h3>
+		
+		{% else %}
 
-	<div class="panel panel-default">
-		<div class ="panel-heading"> 
-			{{ innovation.subject }}
-		</div>
-		<div class ="panel-body">
-				<p><h4>Description:</h4>
-				{{ innovation.description }}</p>
-				<p><h4>Assumptions:</h4>
-				{{ innovation.assumptions }}</p>
-				<p><h4>Benefits:</h4>
-				{{ innovation.benefits }}</p>	
-				<p><h4>Cost:</h4>
-				{{ innovation.costs }}</p>
-		</div>
-		<div class="panel-footer">
-			<button type="submit" class="btn btn-primary">Rate</button>
-			{% if request.user|has_group:"committee_members" %} 
-				<button type="submit" class="btn btn-success">Approve</button>
-				<button type="submit" class="btn btn-info">Ask for Details</button>
-				<button type="submit" class="btn btn-danger">Reject</button>
-			{% endif %}
-			{% if request.user|has_group:"administrators" %} 
-				<button type="submit" class="btn btn-warning pull-right">Change weights</button>
-				<button type="submit" class="btn btn-danger pull-right">Block</button>
-			{% endif %}
-		</div>
-	</div>
+			<div class="panel panel-default">
+				<div class ="panel-heading"> 
+					{{ innovation.subject }}
+				</div>
+				<div class ="panel-body">
+						<p><h4>Description:</h4>
+						{{ innovation.description }}</p>
+						<p><h4>Assumptions:</h4>
+						{{ innovation.assumptions }}</p>
+						<p><h4>Benefits:</h4>
+						{{ innovation.benefits }}</p>	
+						<p><h4>Cost:</h4>
+						{{ innovation.costs }}</p>
+				</div>
+				<div class="panel-footer">
+					{% if innovation.status == "voting" or innovation.status == "IN_REPLENISHMENT" %}
+					<button type="submit" class="btn btn-primary">Rate</button>
+					{% endif %}
+					{% if request.user|has_group:"committee_members" %} 
+						{% if innovation.status == "pending"%}
+							<button type="submit" class="btn btn-success">Approve</button>
+						{% endif %}
+						{% if innovation.status == "voting"%}
+							<button type="submit" class="btn btn-success">Accept</button>
+							<button type="submit" class="btn btn-danger">Reject</button>
+							<button type="submit" class="btn btn-info">Ask for Details</button>
+							<button type="submit" class="btn btn-warning">Suspend</button>
+						{% endif %}
+						{% if innovation.status == "suspended"%}
+							<button type="submit" class="btn btn-success">Activate</button>
+						{% endif %}
 
+					{% endif %}
+					{% if request.user|has_group:"administrators" %} 
+						{% if innovation.status == "accepted" or innovation.status == "rejected" %}
+						<button type="submit" class="btn btn-warning">Change weights</button>
+						<button type="submit" class="btn btn-danger">Block</button>
+						{% else %}
+						<button type="submit" class="btn btn-warning pull-right">Change weights</button>
+						<button type="submit" class="btn btn-danger pull-right">Block</button>
+						{% endif %}
+					{% endif %}
+				</div>
+			</div>
+		{% endif %}
 
 	{% endfor %}
 	

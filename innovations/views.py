@@ -183,22 +183,37 @@ def all_innovation_statuses():
     ]
 	
 def innovation_list(request):
-	innovations = Innovation.objects.filter(status = 'pending').order_by('timestamp')
+	innovations = Innovation.objects.filter(status = 'voting').order_by('timestamp')
+	suspended = Innovation.objects.filter(status = 'suspended').order_by('timestamp')
+	pending = Innovation.objects.filter(status = 'pending').order_by('timestamp')
 	blocked = Innovation.objects.filter(status = 'blocked').order_by('timestamp')
-	approved = Innovation.objects.filter(status = 'approved').order_by('timestamp')
+	details = Innovation.objects.filter(status = 'in_replenishment').order_by('timestamp')
 	template = loader.get_template('innovation_list.html')
 	context = {
 		'innovations': innovations,
-		'blocked': blocked,
-		'approved': approved,
+		'suspended': suspended,
 		}
 	return HttpResponse(template.render(context, request))
 	
 def rejected_list(request):
-	innovations = Innovation.objects.filter(status='rejected').order_by('timestamp')
-	template = loader.get_template('innovation_list.html')
+	rejected = Innovation.objects.filter(status='rejected').order_by('timestamp')
+	approved = Innovation.objects.filter(status = 'accepted').order_by('timestamp')
+	template = loader.get_template('closed_list.html')
 	context = {
-		'innovations': innovations,
+		'rejected': rejected,
+		'approved': approved,
+		}
+	return HttpResponse(template.render(context, request))
+	
+def admin_list(request):
+	pending = Innovation.objects.filter(status = 'pending').order_by('timestamp')
+	blocked = Innovation.objects.filter(status = 'blocked').order_by('timestamp')
+	details = Innovation.objects.filter(status = 'IN_REPLENISHMENT').order_by('timestamp')
+	template = loader.get_template('admin_list.html')
+	context = {
+		'blocked': blocked,
+		'pending': pending,
+		'details': details,
 		}
 	return HttpResponse(template.render(context, request))
 	
