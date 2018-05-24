@@ -6,13 +6,12 @@ from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 
 from innovations.forms import InnovationAddForm, GradeForm, ReportViolationForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
 from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
 from socials.models import Comment, SocialPost
-
 
 from django.http import HttpResponse
 from django.template import loader
@@ -37,6 +36,29 @@ class InnovationAddView(SuccessMessageMixin, CreateView):
         InnovationAttachment.objects.create(file=form.cleaned_data['attachment'], innovation=form.instance)
 
         return super().form_valid(form)
+
+
+class InnovationUpdateView(SuccessMessageMixin, UpdateView):
+    model = Innovation
+    template_name = "add_innovation.html"
+    success_url = '/'
+    success_message = "%(subject)s was successfully updated"
+    fields = ['subject', 'description', 'assumptions', 'benefits', 'costs']
+
+    def dispatch(self, request, *args, **kwargs):
+        innovation = get_object_or_404(Innovation, id=kwargs['pk'])
+        user_is_not_owner = innovation.issuer != request.user
+        replenishment_not_needed = innovation.status != Innovation.Status.IN_REPLENISHMENT
+        if user_is_not_owner or replenishment_not_needed:
+            return render(request, "permission_denied.html")
+        else:
+            return super(InnovationUpdateView, self).dispatch(request, *args, **kwargs)
+
+    @transaction.atomic
+    def form_valid(self, form):
+        form.instance.status = Innovation.Status.PENDING
+        form.instance.save()
+        return super(InnovationUpdateView, self).form_valid(form)
 
 
 @method_decorator(login_required, name='dispatch')
