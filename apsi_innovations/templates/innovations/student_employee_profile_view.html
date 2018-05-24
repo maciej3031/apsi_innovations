@@ -8,14 +8,30 @@
             </div>
     <div class ="panel-body">
     {% for innovation in innovations %}
+        {% if innovation.status == "blocked" or innovation.status == "rejected" %}
+        <div class="panel panel-danger">
+						{% endif %}
+            {% if innovation.status == "in_replenishment" %}
+        <div class="panel panel-warning">
+						{% endif %}
+            {% if innovation.status == "voting" %}
+        <div class="panel panel-info">
+						{% endif %}
+            {% if innovation.status == "accepted" %}
+        <div class="panel panel-success">
+						{% endif %}
+            {% if innovation.status == "suspended" or innovation.status == "pensding" %}
         <div class="panel panel-default">
-			<div class ="panel-heading">
-				<a href="../innovation_details/{{innovation.id}}/">{{ innovation.subject }}</a>
+						{% endif %}
+			<div class ="panel-heading ">
+				<a href="../innovation_details/{{innovation.id}}/">{{ innovation.subject }} </a>  <p class="pull-right">Status: {{innovation.status}}</p>
 			</div>
 			<div class ="panel-body">
-				{{ innovation.description }}
+
+                <p>{{ innovation.description }}</p>
 			</div>
 		</div>
+
     {% endfor %}
     </div>
 </div>
