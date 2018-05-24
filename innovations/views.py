@@ -10,7 +10,8 @@ from django.views.generic import CreateView
 
 from innovations.forms import InnovationAddForm, GradeForm, ReportViolationForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
-from signup.groups import administrators, committee_members, in_groups, students, in_group
+from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
+from socials.models import Comment, SocialPost
 
 
 from django.http import HttpResponse
@@ -59,6 +60,18 @@ def my_innovations(request):
     if status is not None:
         innovations = innovations.filter(status=status)
     return render(request, "innovations/innovations_list.html", {"innovations": innovations})
+
+
+@login_required
+def student_employee_profile(request):
+    if not in_groups(request.user, [students, employees]):
+        return render(request, "permission_denied.html")
+    data = {
+        "innovations": Innovation.objects.filter(issuer=request.user),
+        "posts": SocialPost.objects.filter(issuer=request.user),
+        "comments": Comment.objects.filter(issuer=request.user)
+    }
+    return render(request, "innovations/student_employee_profile_view.html", data)
 
 
 @login_required

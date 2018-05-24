@@ -11,4 +11,5 @@ def in_group(user, group):
 
 
 def in_groups(user, groups):
+    """True if user is in any of provided groups."""
     return any([in_group(user, group) for group in groups])
