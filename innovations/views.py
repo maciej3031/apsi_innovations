@@ -10,6 +10,14 @@ from django.views.generic import CreateView
 from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, AppraiseForm
 from innovations.models import Grade, ViolationReport, Innovation, Keyword, InnovationUrl, InnovationAttachment
 from signup.groups import administrators, committee_members, in_groups,  students, in_group
+from innovations.forms import InnovationAddForm, GradeForm, ReportViolationForm
+from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
+from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
+from socials.models import Comment, SocialPost
+
+
+from django.http import HttpResponse
+from django.template import loader
 
 
 class InnovationAddView(SuccessMessageMixin, CreateView):
@@ -67,6 +75,18 @@ def my_innovations(request):
     if status is not None:
         innovations = innovations.filter(status=status)
     return render(request, "innovations/innovations_list.html", {"innovations": innovations})
+
+
+@login_required
+def student_employee_profile(request):
+    if not in_groups(request.user, [students, employees]):
+        return render(request, "permission_denied.html")
+    data = {
+        "innovations": Innovation.objects.filter(issuer=request.user),
+        "posts": SocialPost.objects.filter(issuer=request.user),
+        "comments": Comment.objects.filter(issuer=request.user)
+    }
+    return render(request, "innovations/student_employee_profile_view.html", data)
 
 
 @login_required
@@ -202,8 +222,54 @@ def all_innovation_statuses():
         if isinstance(status, str) and not status.startswith("__")
     ]
 
+def innovation_list(request):
+	innovations = Innovation.objects.filter(status = 'voting').order_by('timestamp')
+	suspended = Innovation.objects.filter(status = 'suspended').order_by('timestamp')
+	pending = Innovation.objects.filter(status = 'pending').order_by('timestamp')
+	blocked = Innovation.objects.filter(status = 'blocked').order_by('timestamp')
+	details = Innovation.objects.filter(status = 'in_replenishment').order_by('timestamp')
+	template = loader.get_template('innovation_list.html')
+	context = {
+		'innovations': innovations,
+		'suspended': suspended,
+		}
+	return HttpResponse(template.render(context, request))
+
+def rejected_list(request):
+	rejected = Innovation.objects.filter(status='rejected').order_by('timestamp')
+	approved = Innovation.objects.filter(status = 'accepted').order_by('timestamp')
+	template = loader.get_template('closed_list.html')
+	context = {
+		'rejected': rejected,
+		'approved': approved,
+		}
+	return HttpResponse(template.render(context, request))
+
+def admin_list(request):
+	pending = Innovation.objects.filter(status = 'pending').order_by('timestamp')
+	blocked = Innovation.objects.filter(status = 'blocked').order_by('timestamp')
+	details = Innovation.objects.filter(status = 'IN_REPLENISHMENT').order_by('timestamp')
+	template = loader.get_template('admin_list.html')
+	context = {
+		'blocked': blocked,
+		'pending': pending,
+		'details': details,
+		}
+	return HttpResponse(template.render(context, request))
+
+def detail(request, idea_id):
+	template = loader.get_template('innovation_detail.html')
+	idea = Innovation.objects.filter(id=idea_id)
+	comments = Grade.objects.filter(innovation_id = idea_id)
+
 
 def has_appraise_access(user, innovation):
     has_appraise_status = innovation.status in [Innovation.Status.VOTING]
     has_appraise_privileges = (in_groups(user, [committee_members]) and innovation.employee_grade_weight)
     return has_appraise_status and has_appraise_privileges
+
+	context = {
+		'idea': idea,
+		'comments': comments,
+		}
+	return HttpResponse(template.render(context, request))

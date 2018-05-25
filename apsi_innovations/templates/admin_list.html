@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load bootstrap_tags %}
+{% load auth_extras %}
+{% block content %}
+	{% if request.user|has_group:"administrators" or request.user|has_group:"committee_members"%}
+		{% if pending %}
+			<h3>Pending:</h3>
+			{% for innovation in pending %}
+			<div class="panel panel-default">
+				<div class ="panel-heading"> 
+					<a href="innovation_details/{{innovation.id}}/">{{ innovation.subject }}</a>
+					{% if request.user|has_group:"administrators" %}
+					<button type="submit" class="btn btn-danger btn-xs pull-right">Block</button>
+					{% endif %}
+				</div>
+				<div class ="panel-body">
+					{{ innovation.description }}
+				</div>
+			</div>
+			{% endfor %}
+		{% else %}
+			<p>No pending innovations.</p>
+		{% endif %}
+		{% if details %}
+			<h3>Awaiting details:</h3>
+			{% for innovation in details %}
+			<div class="panel panel-default">
+				<div class ="panel-heading"> 
+					<a href="innovation_details/{{innovation.id}}/">{{ innovation.subject }}</a>
+					{% if request.user|has_group:"administrators" %}
+					<button type="submit" class="btn btn-danger btn-xs pull-right">Block</button>
+					{% endif %}
+				</div>
+				<div class ="panel-body">
+					{{ innovation.description }}
+				</div>
+			</div>
+			{% endfor %}
+		{% endif %}
+		{% if blocked %}
+			<h3>Blocked:</h3>
+			{% for innovation in blocked %}
+			<div class="panel panel-default">
+				<div class ="panel-heading"> 
+					<a href="innovation_details/{{innovation.id}}/">{{ innovation.subject }}</a>
+					{% if request.user|has_group:"administrators" %}
+					<button type="submit" class="btn btn-success btn-xs pull-right">Unblock</button>
+					{% endif %}
+				</div>
+				<div class ="panel-body">
+					{{ innovation.description }}
+				</div>
+			</div>
+			{% endfor %}
+		{% endif %}
+	{% endif %}
+{% endblock %}

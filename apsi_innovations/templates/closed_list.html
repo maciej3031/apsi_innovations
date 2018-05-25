@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load bootstrap_tags %}
+{% load auth_extras %}
+{% block content %}
+{% if approved %}
+	<h3>Accepted:</h3>
+    {% for innovation in approved %}
+    <div class="panel panel-default">
+		<div class ="panel-heading"> 
+			<a href="innovation_details/{{innovation.id}}/">{{ innovation.subject }}</a>
+			{% if request.user|has_group:"administrators"%}
+			<button type="submit" class="btn btn-danger btn-xs pull-right">Block</button>
+			{% endif %}
+		</div>
+		<div class ="panel-body">
+			{{ innovation.description }}
+		</div>
+	</div>
+    {% endfor %}
+{% else %}
+    <p>No approved innovations.</p>
+{% endif %}
+{% if rejected %}
+	<h3>Rejected:</h3>
+	{% for innovation in rejected %}
+    <div class="panel panel-default">
+		<div class ="panel-heading"> 
+			<a href="innovation_details/{{innovation.id}}/">{{ innovation.subject }}</a>
+			{% if request.user|has_group:"administrators" %}
+			<button type="submit" class="btn btn-danger btn-xs pull-right">Block</button>
+			{% endif %}
+		</div>
+		<div class ="panel-body">
+			{{ innovation.description }}
+		</div>
+	</div>
+    {% endfor %}
+{% endif %}
+
+{% endblock %}
