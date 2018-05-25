@@ -20,15 +20,17 @@
             {% if innovation.status == "accepted" %}
         <div class="panel panel-success">
 						{% endif %}
-            {% if innovation.status == "suspended" or innovation.status == "pensding" %}
+            {% if innovation.status == "suspended" or innovation.status == "pending" %}
         <div class="panel panel-default">
 						{% endif %}
 			<div class ="panel-heading ">
 				<a href="../innovation_details/{{innovation.id}}/">{{ innovation.subject }} </a>  <p class="pull-right">Status: {{innovation.status}}</p>
 			</div>
 			<div class ="panel-body">
-
                 <p>{{ innovation.description }}</p>
+                {% if innovation.status == "in_replenishment" %}
+                <a href="../edit_innovation/{{innovation.id}}" class="btn btn-info">Update innovation</a>
+                {% endif %}
 			</div>
 		</div>
 
