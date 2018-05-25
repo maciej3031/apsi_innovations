@@ -14,6 +14,13 @@ class InnovationAddForm(forms.ModelForm):
         fields = ['subject', 'description', 'benefits', 'costs']
 
 
+class AppraiseForm(forms.ModelForm):
+
+    class Meta:
+        model = Innovation
+        fields = ['status', 'status_substantiation']
+
+
 class ReportViolationForm(forms.ModelForm):
     class Meta:
         model = ViolationReport
