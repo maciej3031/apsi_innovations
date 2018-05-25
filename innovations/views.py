@@ -7,12 +7,9 @@ from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.views.generic import CreateView
 
-from innovations.forms import GradeForm, ReportViolationForm
-from innovations.forms import InnovationAddForm, AppraiseForm
-from innovations.models import Grade, ViolationReport
-from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment
-from signup.groups import administrators, committee_members, in_groups
-from signup.groups import students, in_group
+from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, AppraiseForm
+from innovations.models import Grade, ViolationReport, Innovation, Keyword, InnovationUrl, InnovationAttachment
+from signup.groups import administrators, committee_members, in_groups,  students, in_group
 
 
 class InnovationAddView(SuccessMessageMixin, CreateView):
@@ -160,7 +157,9 @@ def appraise(request, id):
         if request.method == "POST":
             form = AppraiseForm(data=request.POST)
             if form.is_valid():
-                Innovation.objects.filter(id=id).update(status_substantiation=form.cleaned_data.get('status_substantiation'), status =form.cleaned_data.get('status') )
+                Innovation.objects.filter(id=id)\
+                    .update(status_substantiation=form.cleaned_data.get('status_substantiation'),
+                            status=form.cleaned_data.get('status'))
             return redirect("single", id=id)
     else:
         return render(request, "permission_denied.html")
