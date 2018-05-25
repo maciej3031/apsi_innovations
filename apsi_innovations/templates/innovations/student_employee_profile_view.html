@@ -28,8 +28,12 @@
 			</div>
 			<div class ="panel-body">
                 <p>{{ innovation.description }}</p>
-                {% if innovation.status == "in_replenishment" %}
-                <a href="../edit_innovation/{{innovation.id}}" class="btn btn-info">Update innovation</a>
+
+                {% if innovation.status == "blocked" or innovation.status == "rejected" or innovation.status == "in_replenishment"%}
+                <b>Status substantiation:</b> {{ innovation.status_substantiation }}
+                 {% if innovation.status == "in_replenishment" %}
+                <a href="../edit_innovation/{{innovation.id}}" class="btn btn-info pull-right">Update innovation</a>
+                {% endif %}
                 {% endif %}
 			</div>
 		</div>
