@@ -25,4 +25,5 @@ urlpatterns = [
     url(r'^innovation_details/(?P<idea_id>[0-9]+)', views.detail, name='detail'),
     path('student_employee_profile/', student_employee_profile, name='student_employee_profile'),
     path('appraise/<int:id>', appraise, name='appraise'),
+    path('edit_innovation/<int:pk>', views.InnovationUpdateView.as_view(), name='edit_innovation'),
 ]
