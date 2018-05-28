@@ -3,10 +3,8 @@ from django.conf.urls import url
 from django.views.generic import TemplateView
 from . import views
 
-from innovations.views import ReportViolationView, reported_violations, finish_violation_report, vote
-from innovations.views import single, set_status, InnovationAddView, innovations, my_innovations, appraise
 from innovations.views import single, set_status, InnovationAddView, ReportViolationView, innovations, my_innovations, \
-    reported_violations, finish_violation_report, vote, student_employee_profile
+    reported_violations, finish_violation_report, vote, student_employee_profile, appraise
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name="innovations/innovations_home.html")),
@@ -25,5 +23,5 @@ urlpatterns = [
     url(r'^innovation_details/(?P<idea_id>[0-9]+)', views.detail, name='detail'),
     path('student_employee_profile/', student_employee_profile, name='student_employee_profile'),
     path('appraise/<int:id>', appraise, name='appraise'),
-    path('edit_innovation/<int:pk>', views.InnovationUpdateView.as_view(), name='edit_innovation'),
+    # path('edit_innovation/<int:pk>', InnovationUpdateView.as_view(), name='edit_innovation'),
 ]

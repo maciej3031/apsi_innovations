@@ -95,38 +95,12 @@ def innovations(request):
     return render(request, "innovations/innovations_list.html", {"innovations": innovations})
 
 
-def calculate_innovation_grade(innovation):
-    aggregate_grade = 0
-    grades = Grade.objects.get(innovation_id=innovation.id)
-    if not grades:
-        return None
-    number_of_votes = len(grades)
-    for grade in grades:
-        user_weight = get_user_grade_weight(grade.user_id, innovation)
-        aggregate_grade += calculate_single_grade(user_weight, grade.value)
-    return aggregate_grade/number_of_votes
-
-
-def calculate_single_grade(user_weight, user_grade):
-    return float(user_weight * user_grade)
-
-
-def get_user_grade_weight(user, innovation):
-    if user.group_id == 1:
-        return innovation.student_grade_weight
-    elif user.group_id == 3:
-        return innovation.employee_grade_weight
-    else:
-        raise ValueError('Grade given by user without privileges')
-
-
 @login_required
 def single(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if is_forbidden(innovation.status, request.user):
         raise Http404("Page not found!")
-    grade = calculate_innovation_grade(innovation)
-    return render(request, "innovations/innovations_list.html", {"innovations": [innovation], "grade": [grade]})
+    return render(request, "innovations/innovations_list.html", {"innovations": [innovation]})
 
 
 @login_required
@@ -284,7 +258,7 @@ def admin_list(request):
 def detail(request, idea_id):
     template = loader.get_template('innovation_detail.html')
     idea = Innovation.objects.filter(id=idea_id)
-    comments = Grade.objects.filter(innovation_id = idea_id)
+    comments = Grade.objects.filter(innovation_id=idea_id)
     context = {
         'idea': idea,
         'comments': comments,
