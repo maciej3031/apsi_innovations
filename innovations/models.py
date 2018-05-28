@@ -5,7 +5,7 @@ from django.db import models
 
 
 class Innovation(models.Model):
-    class Status():
+    class Status:
         ACCEPTED = 'accepted'
         BLOCKED = 'blocked'
         REJECTED = 'rejected'
