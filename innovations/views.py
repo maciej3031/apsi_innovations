@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.template import loader
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 
 from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, AppraiseForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
@@ -33,6 +33,29 @@ class InnovationAddView(SuccessMessageMixin, CreateView):
         InnovationAttachment.objects.create(file=form.cleaned_data['attachment'], innovation=form.instance)
 
         return super().form_valid(form)
+
+
+class InnovationUpdateView(SuccessMessageMixin, UpdateView):
+    model = Innovation
+    template_name = "add_innovation.html"
+    success_url = '/'
+    success_message = "%(subject)s was successfully updated"
+    fields = ['subject', 'description', 'assumptions', 'benefits', 'costs']
+
+    def dispatch(self, request, *args, **kwargs):
+        innovation = get_object_or_404(Innovation, id=kwargs['pk'])
+        user_is_not_owner = innovation.issuer != request.user
+        replenishment_not_needed = innovation.status != Innovation.Status.IN_REPLENISHMENT
+        if user_is_not_owner or replenishment_not_needed:
+            return render(request, "permission_denied.html")
+        else:
+            return super(InnovationUpdateView, self).dispatch(request, *args, **kwargs)
+
+    @transaction.atomic
+    def form_valid(self, form):
+        form.instance.status = Innovation.Status.PENDING
+        form.instance.save()
+        return super(InnovationUpdateView, self).form_valid(form)
 
 
 class InnovationAppraiseView(SuccessMessageMixin, CreateView):
@@ -95,38 +118,12 @@ def innovations(request):
     return render(request, "innovations/innovations_list.html", {"innovations": innovations})
 
 
-def calculate_innovation_grade(innovation):
-    aggregate_grade = 0
-    grades = Grade.objects.get(innovation_id=innovation.id)
-    if not grades:
-        return None
-    number_of_votes = len(grades)
-    for grade in grades:
-        user_weight = get_user_grade_weight(grade.user_id, innovation)
-        aggregate_grade += calculate_single_grade(user_weight, grade.value)
-    return aggregate_grade/number_of_votes
-
-
-def calculate_single_grade(user_weight, user_grade):
-    return float(user_weight * user_grade)
-
-
-def get_user_grade_weight(user, innovation):
-    if user.group_id == 1:
-        return innovation.student_grade_weight
-    elif user.group_id == 3:
-        return innovation.employee_grade_weight
-    else:
-        raise ValueError('Grade given by user without privileges')
-
-
 @login_required
 def single(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if is_forbidden(innovation.status, request.user):
         raise Http404("Page not found!")
-    grade = calculate_innovation_grade(innovation)
-    return render(request, "innovations/innovations_list.html", {"innovations": [innovation], "grade": [grade]})
+    return render(request, "innovations/innovations_list.html", {"innovations": [innovation]})
 
 
 @login_required
@@ -284,7 +281,7 @@ def admin_list(request):
 def detail(request, idea_id):
     template = loader.get_template('innovation_detail.html')
     idea = Innovation.objects.filter(id=idea_id)
-    comments = Grade.objects.filter(innovation_id = idea_id)
+    comments = Grade.objects.filter(innovation_id=idea_id)
     context = {
         'idea': idea,
         'comments': comments,
