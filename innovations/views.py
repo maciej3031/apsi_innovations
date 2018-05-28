@@ -284,7 +284,7 @@ def admin_list(request):
 def detail(request, idea_id):
     template = loader.get_template('innovation_detail.html')
     idea = Innovation.objects.filter(id=idea_id)
-    comments = Grade.objects.filter(innovation_id=idea_id)
+    comments = Grade.objects.filter(innovation_id = idea_id)
     context = {
         'idea': idea,
         'comments': comments,
