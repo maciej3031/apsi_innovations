@@ -37,7 +37,7 @@
       
             <ul class="nav navbar-nav navbar-right">
                 {% if user.is_authenticated %}
-                {% if request.user|has_group:"students" or request.user|has_group:"committee_members"%}
+                {% if request.user|has_group:"students" or request.user|has_group:"employees"%}
                 <li><a href="{% url 'student_employee_profile' %}"><span class="glyphicon glyphicon-user"></span>My profile</a></li>
                 {% endif %}
                 <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span>logout</a></li>
