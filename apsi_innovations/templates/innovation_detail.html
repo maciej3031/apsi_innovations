@@ -27,7 +27,9 @@
 				</div>
 				<div class="panel-footer">
 					{% if innovation.status == "voting" or innovation.status == "IN_REPLENISHMENT" %}
-					<button type="submit" class="btn btn-primary">Rate</button>
+					{% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight  %}
+					 <a href="/innovations/vote/{{ innovation.id }}/" class="btn btn-primary">VOTE</a>
+            		{% endif %}
 					{% endif %}
 					{% if request.user|has_group:"committee_members" %} 
 						{% if innovation.status == "pending"%}
