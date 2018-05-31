@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import re_path, path
 
 from socials.views import InspirationListView, AddCommentView
 
 urlpatterns = [
-    url(r'^social_posts/$', InspirationListView.as_view(), name='social_posts'),
-    url(r'^social_posts/(?P<pk>\d+)/comment/$', AddCommentView.as_view(), name='add_comment'),
+    path(r'social_posts/', InspirationListView.as_view(), name='social_posts'),
+    re_path(r'^social_posts/(?P<pk>\d+)/comment/$', AddCommentView.as_view(), name='add_comment'),
 ]
