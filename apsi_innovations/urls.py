@@ -25,6 +25,7 @@ urlpatterns = [
     path(r'', include('signup.urls')),
     path(r'innovations/', include('innovations.urls')),
     path(r'accounts/', include('django.contrib.auth.urls')),
+    path(r'socials/', include('socials.urls')),
 ]
 
 if settings.DEBUG:

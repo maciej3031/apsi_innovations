@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load bootstrap_tags %}
+{% load user_tags %}
+{% load innovation_tags %}
+{% block content %}
+  <form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form|as_bootstrap }}
+    <button type="submit" class="btn btn-primary">Post!</button>
+  </form>
+  {% for social_post in social_posts %}
+
+    <h4>{{ social_post.text|linebreaksbr }}</h4>
+    <h3>{{ social_post.issuer }}</h3>
+    <h3>{{ social_post.timestamp }}</h3>
+    {% for attachment in social_post.attachments.all %}
+      <a href='{{ attachment.file.url }}'>{{ attachment.file }}</a><br>
+    {% endfor %}
+    {% for comment in social_post.comments.all %}
+      <h5>{{ comment.text|linebreaksbr }}</h5>
+      <h5>{{ comment.issuer }}</h5>
+      <h5>{{ comment.timestamp }}</h5>
+    {% endfor %}
+    <form action="{% url "add_comment" social_post.pk %}" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ comment_form|as_bootstrap }}
+      <button type="submit" class="btn btn-primary">Add Comment!</button>
+    </form>
+
+  {% endfor %}
+  {% if is_paginated %}
+    <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                  <a href="/socials/social_posts/?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+              <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+              {% if page_obj.has_next %}
+                <a href="/socials/social_posts/?page={{ page_obj.next_page_number }}">next</a>
+              {% endif %}
+            </span>
+    </div>
+  {% endif %}
+
+{% endblock %}
+
