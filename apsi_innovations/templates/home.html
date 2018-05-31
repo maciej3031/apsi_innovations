@@ -4,29 +4,32 @@
 
 
 
-<div class="container">
-  <div class="row">
-    <div class="col-sm-2" >
-    </div>
-    <div class="col-sm-6" >
-  <h2>Welcome, {{ user.username }}!</h2>
-{% if messages %}
-    <ul class="messages">
-      {% for message in messages %}
-        {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}
-      {% endfor %}
-    </ul>
-  {% endif %}
-    <ul class="list-group">
-    <h3>
-					<a href="{% url 'add_innovation' %}" class="list-group-item list-group-item-info ">Add innovation</a>
-					<a href="{% url 'innovation_list' %}" class="list-group-item list-group-item-info">Vote for ideas</a>
-					<a href="{% url 'student_employee_profile' %}" class="list-group-item list-group-item-info">Change the world!</a>
-    </h3>
-</ul>
-    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-2">
+            </div>
+            <div class="col-sm-6">
+                <h2>Welcome, {{ user.username }}!</h2>
+                {% if messages %}
+                    <ul class="messages"
+                        {% for message in messages %}
+                            {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <ul class="list-group">
+                    <h3>
+                        <a href="{% url 'add_innovation' %}" class="list-group-item list-group-item-info ">Add
+                            innovation</a>
+                        <a href="{% url 'innovations' %}?status=voting " class="list-group-item list-group-item-info">Vote
+                            for ideas</a>
+                        <a href="{% url 'student_employee_profile' %}" class="list-group-item list-group-item-info">Change
+                            the world!</a>
+                    </h3>
+                </ul>
+            </div>
 
-  </div>
-</div>
+        </div>
+    </div>
 
 {% endblock %}

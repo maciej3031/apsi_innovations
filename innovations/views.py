@@ -5,7 +5,6 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
-from django.template import loader
 from django.views.generic import CreateView, UpdateView
 
 from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, AppraiseForm
@@ -58,19 +57,6 @@ class InnovationUpdateView(SuccessMessageMixin, UpdateView):
         return super(InnovationUpdateView, self).form_valid(form)
 
 
-class InnovationAppraiseView(SuccessMessageMixin, CreateView):
-    template_name = 'innovations/appraise.html'
-    form_class = AppraiseForm
-    success_url = '/'
-    success_message = "You appraised successfully. Thank you!"
-
-    @transaction.atomic
-    def form_valid(self, form):
-        form.instance.issuer = self.request.user
-        form.instance.innovation = Innovation.objects.get(id=self.kwargs['id'])
-        return super().form_valid(form)
-
-
 @method_decorator(login_required, name='dispatch')
 class ReportViolationView(SuccessMessageMixin, CreateView):
     template_name = 'innovations/report_violation.html'
@@ -83,15 +69,6 @@ class ReportViolationView(SuccessMessageMixin, CreateView):
         form.instance.issuer = self.request.user
         form.instance.innovation = Innovation.objects.get(id=self.kwargs['id'])
         return super().form_valid(form)
-
-
-@login_required
-def my_innovations(request):
-    innovations = Innovation.objects.filter(issuer=request.user)
-    status = request.GET.get('status')
-    if status is not None:
-        innovations = innovations.filter(status=status)
-    return render(request, "innovations/innovations_list.html", {"innovations": innovations})
 
 
 @login_required
@@ -109,21 +86,26 @@ def student_employee_profile(request):
 @login_required
 def innovations(request):
     user = request.user
-    innovations = Innovation.objects.all()
-    status = request.GET.get('status')
-    if status is not None:
-        innovations = innovations.filter(status=status)
+    innovations = Innovation.objects.all().order_by("timestamp")
+    statuses = request.GET.getlist('status')
+    if statuses:
+        innovations = innovations.filter(status__in=statuses)
     if not has_confidential_access(user):
         innovations = innovations.exclude(status__in=get_confidential_statuses())
     return render(request, "innovations/innovations_list.html", {"innovations": innovations})
 
 
 @login_required
-def single(request, id):
+def details(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if is_forbidden(innovation.status, request.user):
         raise Http404("Page not found!")
-    return render(request, "innovations/innovations_list.html", {"innovations": [innovation]})
+    comments = Grade.objects.filter(innovation=innovation)
+    context = {
+        'innovation': innovation,
+        'comments': comments,
+    }
+    return render(request, "innovations/details.html", context)
 
 
 @login_required
@@ -178,13 +160,6 @@ def finish_violation_report(request):
 
 
 @login_required
-def set_status_substantiation(request, id, status_substantiation):
-    if not has_confidential_access(request.user):
-        raise render(request, "permission_denied.html")
-    Innovation.objects.filter(id=id).update(status_substantiation=status_substantiation)
-    return redirect("single", id=id)
-
-
 def appraise(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if has_appraise_access(request.user, innovation):
@@ -194,10 +169,10 @@ def appraise(request, id):
         if request.method == "POST":
             form = AppraiseForm(data=request.POST)
             if form.is_valid():
-                Innovation.objects.filter(id=id)\
+                Innovation.objects.filter(id=id) \
                     .update(status_substantiation=form.cleaned_data.get('status_substantiation'),
                             status=form.cleaned_data.get('status'))
-            return redirect("single", id=id)
+            return redirect("details", id=id)
     else:
         return render(request, "permission_denied.html")
 
@@ -228,68 +203,13 @@ def get_previous_vote(innovation_id, user_id):
 def has_voting_access(user, innovation):
     has_voting_status = innovation.status in [Innovation.Status.VOTING]
     has_voting_privileges = (in_group(user, students) and innovation.student_grade_weight) or \
-                            (in_group(user, committee_members) and innovation.employee_grade_weight)
+                            (in_group(user, employees) and innovation.employee_grade_weight)
     return has_voting_status and has_voting_privileges
 
 
-def all_innovation_statuses():
-    return [
-        getattr(Innovation.Status, status)
-        for status in dir(Innovation.Status)
-        if isinstance(status, str) and not status.startswith("__")
-    ]
-
-
-def innovation_list(request):
-    innovations = Innovation.objects.filter(status='voting').order_by('timestamp')
-    suspended = Innovation.objects.filter(status='suspended').order_by('timestamp')
-    pending = Innovation.objects.filter(status='pending').order_by('timestamp')
-    blocked = Innovation.objects.filter(status='blocked').order_by('timestamp')
-    details = Innovation.objects.filter(status='in_replenishment').order_by('timestamp')
-    template = loader.get_template('innovation_list.html')
-    context = {
-        'innovations': innovations,
-        'suspended': suspended,
-        }
-    return HttpResponse(template.render(context, request))
-
-
-def rejected_list(request):
-    rejected = Innovation.objects.filter(status='rejected').order_by('timestamp')
-    approved = Innovation.objects.filter(status='accepted').order_by('timestamp')
-    template = loader.get_template('closed_list.html')
-    context = {
-        'rejected': rejected,
-        'approved': approved,
-        }
-    return HttpResponse(template.render(context, request))
-
-
-def admin_list(request):
-    pending = Innovation.objects.filter(status='pending').order_by('timestamp')
-    blocked = Innovation.objects.filter(status='blocked').order_by('timestamp')
-    details = Innovation.objects.filter(status='IN_REPLENISHMENT').order_by('timestamp')
-    template = loader.get_template('admin_list.html')
-    context = {
-        'blocked': blocked,
-        'pending': pending,
-        'details': details,
-        }
-    return HttpResponse(template.render(context, request))
-
-
-def detail(request, idea_id):
-    template = loader.get_template('innovation_detail.html')
-    idea = Innovation.objects.filter(id=idea_id)
-    comments = Grade.objects.filter(innovation_id=idea_id)
-    context = {
-        'idea': idea,
-        'comments': comments,
-    }
-    return HttpResponse(template.render(context, request))
-
-
+# todo refactor appraising, replace with update_status
 def has_appraise_access(user, innovation):
-    has_appraise_status = innovation.status in [Innovation.Status.VOTING]
-    has_appraise_privileges = (in_groups(user, [committee_members]) and innovation.employee_grade_weight)
-    return has_appraise_status and has_appraise_privileges
+    return True
+    #has_appraise_status = innovation.status in [Innovation.Status.VOTING]
+    #has_appraise_privileges = (in_groups(user, [committee_members]) and innovation.employee_grade_weight)
+    #return has_appraise_status and has_appraise_privileges
