@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'innovations',
     'socials',
-    'django_forms_bootstrap'
+    'django_forms_bootstrap',
 ]
 
 MIDDLEWARE = [
