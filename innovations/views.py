@@ -100,18 +100,6 @@ def student_employee_profile(request):
 
 
 @login_required
-def innovations(request):
-    user = request.user
-    innovations = Innovation.objects.all().order_by("timestamp")
-    statuses = request.GET.getlist('status')
-    if statuses:
-        innovations = innovations.filter(status__in=statuses)
-    if not has_confidential_access(user):
-        innovations = innovations.exclude(status__in=get_confidential_statuses())
-    return render(request, "innovations/innovations_list.html", {"innovations": innovations})
-
-
-@login_required
 def details(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if is_forbidden(innovation.status, request.user):
