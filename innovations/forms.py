@@ -6,8 +6,8 @@ from innovations.models import Innovation, ViolationReport, Grade
 # TODO: url i attachment powinny umożliwiać dodanie więcej niż jednego elementu
 class InnovationAddForm(forms.ModelForm):
     keywords = forms.CharField(max_length=2048)
-    url = forms.URLField()
-    attachment = forms.FileField()
+    url = forms.URLField(required=False)
+    attachment = forms.FileField(required=False)
 
     class Meta:
         model = Innovation
