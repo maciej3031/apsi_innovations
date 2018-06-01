@@ -1,11 +1,11 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.decorators import method_decorator
 from django.utils.timezone import now
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, ListView
 
 from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, AppraiseForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
@@ -13,7 +13,7 @@ from signup.groups import administrators, committee_members, in_groups, students
 from socials.models import Comment, SocialPost
 
 
-class InnovationAddView(SuccessMessageMixin, CreateView):
+class InnovationAddView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     template_name = 'add_innovation.html'
     form_class = InnovationAddForm
     success_url = '/'
@@ -34,7 +34,7 @@ class InnovationAddView(SuccessMessageMixin, CreateView):
         return super().form_valid(form)
 
 
-class InnovationUpdateView(SuccessMessageMixin, UpdateView):
+class InnovationUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Innovation
     template_name = "add_innovation.html"
     success_url = '/'
@@ -57,8 +57,7 @@ class InnovationUpdateView(SuccessMessageMixin, UpdateView):
         return super(InnovationUpdateView, self).form_valid(form)
 
 
-@method_decorator(login_required, name='dispatch')
-class ReportViolationView(SuccessMessageMixin, CreateView):
+class ReportViolationView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     template_name = 'innovations/report_violation.html'
     form_class = ReportViolationForm
     success_url = '/'
@@ -69,6 +68,22 @@ class ReportViolationView(SuccessMessageMixin, CreateView):
         form.instance.issuer = self.request.user
         form.instance.innovation = Innovation.objects.get(id=self.kwargs['id'])
         return super().form_valid(form)
+
+
+class InnovationListView(LoginRequiredMixin, ListView):
+    paginate_by = 10
+    template_name = "innovations/innovations_list.html"
+    model = Innovation
+
+    def get_queryset(self):
+        queryset = super(InnovationListView, self).get_queryset()
+        user = self.request.user
+        statuses = self.request.GET.getlist('status')
+        if statuses:
+            queryset = queryset.filter(status__in=statuses)
+        if not has_confidential_access(user):
+            queryset = queryset.exclude(status__in=get_confidential_statuses())
+        return queryset
 
 
 @login_required
@@ -131,7 +146,7 @@ def vote(request, id):
                 form.instance.user = request.user
                 form.instance.innovation = innovation
                 form.instance.save()
-            return redirect("single", id=id)
+            return redirect("details", id=id)
     else:
         return render(request, "permission_denied.html")
 

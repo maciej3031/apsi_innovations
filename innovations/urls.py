@@ -3,12 +3,13 @@ from django.conf.urls import url
 from django.views.generic import TemplateView
 from . import views
 
-from innovations.views import set_status, InnovationAddView, ReportViolationView, innovations, \
-    reported_violations, finish_violation_report, vote, student_employee_profile, appraise, InnovationUpdateView
+from innovations.views import set_status, InnovationAddView, ReportViolationView, \
+    reported_violations, finish_violation_report, vote, student_employee_profile, update_status, InnovationUpdateView, \
+    InnovationListView
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name="innovations/innovations_home.html")),
-    path('innovations/', innovations, name='innovations'),
+    path('innovations/', InnovationListView.as_view(), name='innovations'),
     path('add_innovation/', InnovationAddView.as_view(), name='add_innovation'),
     path('set_status/<int:id>/<str:status>/', set_status, name='set_status'),
     path('vote/<int:id>/', vote, name='vote'),
