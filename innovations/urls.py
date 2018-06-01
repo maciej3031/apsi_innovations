@@ -18,6 +18,6 @@ urlpatterns = [
     path('finish_violation_report/', finish_violation_report, name='finish_violation_report'),
     path('details/<int:id>', views.details, name='details'),
     path('student_employee_profile/', student_employee_profile, name='student_employee_profile'),
-    path('appraise/<int:id>', appraise, name='appraise'),
+    path('update_status/<int:id>', update_status, name='update_status'),
     path('edit_innovation/<int:pk>', InnovationUpdateView.as_view(), name='edit_innovation'),
 ]

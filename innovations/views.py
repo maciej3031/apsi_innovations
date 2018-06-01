@@ -7,8 +7,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 from django.views.generic import CreateView, UpdateView, ListView
 
-from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, AppraiseForm
+from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, StatusUpdateForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
+from innovations.status_flow import try_update_status
 from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
 from socials.models import Comment, SocialPost
 
@@ -124,11 +125,11 @@ def details(request, id):
 
 
 @login_required
+@transaction.atomic
 def set_status(request, id, status):
-    if not has_confidential_access(request.user):
-        return render(request, "permission_denied.html")
-    Innovation.objects.filter(id=id).update(status=status)
-    return redirect("single", id=id)
+    innovation = get_object_or_404(Innovation, id=id)
+    try_update_status(request.user, innovation, status)
+    return redirect("details", id=id)
 
 
 @login_required
@@ -175,21 +176,21 @@ def finish_violation_report(request):
 
 
 @login_required
-def appraise(request, id):
+@transaction.atomic
+def update_status(request, id):
     innovation = get_object_or_404(Innovation, id=id)
-    if has_appraise_access(request.user, innovation):
-        if request.method == 'GET':
-            form = AppraiseForm()
-            return render(request, "innovations/appraise.html", {"form": form})
-        if request.method == "POST":
-            form = AppraiseForm(data=request.POST)
-            if form.is_valid():
-                Innovation.objects.filter(id=id) \
-                    .update(status_substantiation=form.cleaned_data.get('status_substantiation'),
-                            status=form.cleaned_data.get('status'))
-            return redirect("details", id=id)
-    else:
-        return render(request, "permission_denied.html")
+    if request.method == 'GET':
+        form = StatusUpdateForm()
+        return render(request, "innovations/update_status.html", {"form": form})
+    if request.method == "POST":
+        form = StatusUpdateForm(data=request.POST)
+        if form.is_valid():
+            status = form.cleaned_data.get('status')
+            status_substantiation = form.cleaned_data.get('status_substantiation'),
+            if try_update_status(request.user, innovation, status, status_substantiation):
+                return redirect("details", id=id)
+            else:
+                return render(request, "permission_denied.html")
 
 
 def is_forbidden(status, user):
@@ -220,11 +221,3 @@ def has_voting_access(user, innovation):
     has_voting_privileges = (in_group(user, students) and innovation.student_grade_weight) or \
                             (in_group(user, employees) and innovation.employee_grade_weight)
     return has_voting_status and has_voting_privileges
-
-
-# todo refactor appraising, replace with update_status
-def has_appraise_access(user, innovation):
-    return True
-    #has_appraise_status = innovation.status in [Innovation.Status.VOTING]
-    #has_appraise_privileges = (in_groups(user, [committee_members]) and innovation.employee_grade_weight)
-    #return has_appraise_status and has_appraise_privileges

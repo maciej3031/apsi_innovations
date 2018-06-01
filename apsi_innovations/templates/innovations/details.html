@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% load bootstrap_tags %}
-{% load auth_extras %}
+{% load user_tags %}
 {% block content %}
     {% if innovation %}
 
-        {% if innovation.status == "blocked" %}
+        {% if innovation.status == "blocked" and not request.user|has_group:"administrators" %}
 
             <h3>This idea has been blocked by an administrator.</h3>
 
@@ -27,39 +27,21 @@
                 <div class="panel-footer">
                     {% if innovation.status == "voting" or innovation.status == "in_replenishment" %}
                         {% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight %}
-                            <a href="{% url 'vote' id=innovation.id %}{{ innovation.id }}/"
+                            <a href="{% url 'vote' id=innovation.id %}/"
                                class="btn btn-primary">VOTE</a>
                         {% endif %}
                     {% endif %}
                     {% if request.user|has_group:"committee_members" or  request.user|has_group:"administrators" %}
-                        <a href="{% url 'appraise' id=innovation.id %}">
+                        <a href="{% url 'update_status' id=innovation.id %}">
                             <button type="submit" class="btn btn-danger pull-right">Change status</button>
                         </a>
+                        {% if innovation.status == "pending" or innovation.status == "in_replenishment" %}
+                            <a href="{% url 'set_status' id=innovation.id status="voting" %}">
+                                <button type="submit" class="btn btn-danger pull-right">Start voting</button>
+                            </a>
+                        {% endif %}
+                        {# TODO consider adding more fast set_status buttons. #}
                     {% endif %}
-                    {#                    {% if request.user|has_group:"committee_members" %}#}
-                    {#                        {% if innovation.status == "pending" %}#}
-                    {#                            <button type="submit" class="btn btn-success">Approve</button>#}
-                    {#                        {% endif %}#}
-                    {#                        {% if innovation.status == "voting" %}#}
-                    {#                            <button type="submit" class="btn btn-success">Accept</button>#}
-                    {#                            <button type="submit" class="btn btn-danger">Reject</button>#}
-                    {#                            <button type="submit" class="btn btn-info">Ask for Details</button>#}
-                    {#                            <button type="submit" class="btn btn-warning">Suspend</button>#}
-                    {#                        {% endif %}#}
-                    {#                        {% if innovation.status == "suspended" %}#}
-                    {#                            <button type="submit" class="btn btn-success">Activate</button>#}
-                    {#                        {% endif %}#}
-                    {##}
-                    {#                    {% endif %}#}
-                    {#                    {% if request.user|has_group:"administrators" %}#}
-                    {#                        {% if innovation.status == "accepted" or innovation.status == "rejected" %}#}
-                    {#                            <button type="submit" class="btn btn-warning">Change weights</button>#}
-                    {#                            <button type="submit" class="btn btn-danger">Block</button>#}
-                    {#                        {% else %}#}
-                    {#                            <button type="submit" class="btn btn-warning pull-right">Change weights</button>#}
-                    {#                            <button type="submit" class="btn btn-danger pull-right">Block</button>#}
-                    {#                        {% endif %}#}
-                    {#                    {% endif %}#}
                 </div>
             </div>
         {% endif %}

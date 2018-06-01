@@ -14,7 +14,7 @@ class InnovationAddForm(forms.ModelForm):
         fields = ['subject', 'description', 'benefits', 'costs']
 
 
-class AppraiseForm(forms.ModelForm):
+class StatusUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Innovation
