@@ -27,7 +27,7 @@
                 <div class="panel-footer">
                     {% if innovation.status == "voting" or innovation.status == "in_replenishment" %}
                         {% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight %}
-                            <a href="{% url 'vote' id=innovation.id %}/"
+                            <a href="{% url 'vote' id=innovation.id %}"
                                class="btn btn-primary">VOTE</a>
                         {% endif %}
                     {% endif %}
