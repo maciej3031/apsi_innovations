@@ -2,8 +2,10 @@ from django import forms
 
 from innovations.models import Innovation, ViolationReport, Grade
 
-
 # TODO: url i attachment powinny umożliwiać dodanie więcej niż jednego elementu
+from innovations.status_flow import available_status_choices
+
+
 class InnovationAddForm(forms.ModelForm):
     keywords = forms.CharField(max_length=2048)
     url = forms.URLField(required=False)
@@ -15,7 +17,6 @@ class InnovationAddForm(forms.ModelForm):
 
 
 class StatusUpdateForm(forms.ModelForm):
-
     class Meta:
         model = Innovation
         fields = ['status', 'status_substantiation']

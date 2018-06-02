@@ -46,6 +46,11 @@
                     <li><a href="{% url 'student_employee_profile' %}"><span class="glyphicon glyphicon-user"></span>My
                         profile</a></li>
                 {% endif %}
+                {% if request.user|has_group:"administrators" %}
+                    <li><a href="{% url 'reported_violations' %}">
+                        <span class="glyphicon glyphicon-warning-sign">Violations</span></a>
+                    </li>
+                {% endif %}
                 <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span>logout</a></li>
             {% else %}
                 <li><a href="{% url 'login' %}"><span class="glyphicon glyphicon-log-in"></span> Log In</a></li>

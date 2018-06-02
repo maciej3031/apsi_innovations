@@ -9,7 +9,7 @@ from django.views.generic import CreateView, UpdateView, ListView
 
 from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, StatusUpdateForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
-from innovations.status_flow import try_update_status
+from innovations.status_flow import try_update_status, available_status_choices
 from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
 from socials.models import Comment, SocialPost
 
@@ -169,6 +169,7 @@ def update_status(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if request.method == 'GET':
         form = StatusUpdateForm()
+        form.fields["status"].choices = available_status_choices(request.user, innovation)
         return render(request, "innovations/update_status.html", {"form": form})
     if request.method == "POST":
         form = StatusUpdateForm(data=request.POST)
