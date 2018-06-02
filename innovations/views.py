@@ -1,20 +1,20 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.decorators import method_decorator
 from django.utils.timezone import now
-from django.template import loader
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, ListView
 
-from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, AppraiseForm
+from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, StatusUpdateForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
+from innovations.status_flow import try_update_status, available_status_choices
 from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
 from socials.models import Comment, SocialPost
 
 
-class InnovationAddView(SuccessMessageMixin, CreateView):
+class InnovationAddView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     template_name = 'add_innovation.html'
     form_class = InnovationAddForm
     success_url = '/'
@@ -35,7 +35,7 @@ class InnovationAddView(SuccessMessageMixin, CreateView):
         return super().form_valid(form)
 
 
-class InnovationUpdateView(SuccessMessageMixin, UpdateView):
+class InnovationUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Innovation
     template_name = "add_innovation.html"
     success_url = '/'
@@ -58,21 +58,7 @@ class InnovationUpdateView(SuccessMessageMixin, UpdateView):
         return super(InnovationUpdateView, self).form_valid(form)
 
 
-class InnovationAppraiseView(SuccessMessageMixin, CreateView):
-    template_name = 'innovations/appraise.html'
-    form_class = AppraiseForm
-    success_url = '/'
-    success_message = "You appraised successfully. Thank you!"
-
-    @transaction.atomic
-    def form_valid(self, form):
-        form.instance.issuer = self.request.user
-        form.instance.innovation = Innovation.objects.get(id=self.kwargs['id'])
-        return super().form_valid(form)
-
-
-@method_decorator(login_required, name='dispatch')
-class ReportViolationView(SuccessMessageMixin, CreateView):
+class ReportViolationView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     template_name = 'innovations/report_violation.html'
     form_class = ReportViolationForm
     success_url = '/'
@@ -85,13 +71,20 @@ class ReportViolationView(SuccessMessageMixin, CreateView):
         return super().form_valid(form)
 
 
-@login_required
-def my_innovations(request):
-    innovations = Innovation.objects.filter(issuer=request.user)
-    status = request.GET.get('status')
-    if status is not None:
-        innovations = innovations.filter(status=status)
-    return render(request, "innovations/innovations_list.html", {"innovations": innovations})
+class InnovationListView(LoginRequiredMixin, ListView):
+    paginate_by = 10
+    template_name = "innovations/innovations_list.html"
+    model = Innovation
+
+    def get_queryset(self):
+        queryset = super(InnovationListView, self).get_queryset()
+        user = self.request.user
+        statuses = self.request.GET.getlist('status')
+        if statuses:
+            queryset = queryset.filter(status__in=statuses)
+        if not has_confidential_access(user):
+            queryset = queryset.exclude(status__in=get_confidential_statuses())
+        return queryset
 
 
 @login_required
@@ -107,31 +100,24 @@ def student_employee_profile(request):
 
 
 @login_required
-def innovations(request):
-    user = request.user
-    innovations = Innovation.objects.all()
-    status = request.GET.get('status')
-    if status is not None:
-        innovations = innovations.filter(status=status)
-    if not has_confidential_access(user):
-        innovations = innovations.exclude(status__in=get_confidential_statuses())
-    return render(request, "innovations/innovations_list.html", {"innovations": innovations})
-
-
-@login_required
-def single(request, id):
+def details(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if is_forbidden(innovation.status, request.user):
         raise Http404("Page not found!")
-    return render(request, "innovations/innovations_list.html", {"innovations": [innovation]})
+    comments = Grade.objects.filter(innovation=innovation)
+    context = {
+        'innovation': innovation,
+        'comments': comments,
+    }
+    return render(request, "innovations/details.html", context)
 
 
 @login_required
+@transaction.atomic
 def set_status(request, id, status):
-    if not has_confidential_access(request.user):
-        return render(request, "permission_denied.html")
-    Innovation.objects.filter(id=id).update(status=status)
-    return redirect("single", id=id)
+    innovation = get_object_or_404(Innovation, id=id)
+    try_update_status(request.user, innovation, status)
+    return redirect("details", id=id)
 
 
 @login_required
@@ -149,7 +135,7 @@ def vote(request, id):
                 form.instance.user = request.user
                 form.instance.innovation = innovation
                 form.instance.save()
-            return redirect("single", id=id)
+            return redirect("details", id=id)
     else:
         return render(request, "permission_denied.html")
 
@@ -178,28 +164,22 @@ def finish_violation_report(request):
 
 
 @login_required
-def set_status_substantiation(request, id, status_substantiation):
-    if not has_confidential_access(request.user):
-        raise render(request, "permission_denied.html")
-    Innovation.objects.filter(id=id).update(status_substantiation=status_substantiation)
-    return redirect("single", id=id)
-
-
-def appraise(request, id):
+@transaction.atomic
+def update_status(request, id):
     innovation = get_object_or_404(Innovation, id=id)
-    if has_appraise_access(request.user, innovation):
-        if request.method == 'GET':
-            form = AppraiseForm()
-            return render(request, "innovations/appraise.html", {"form": form})
-        if request.method == "POST":
-            form = AppraiseForm(data=request.POST)
-            if form.is_valid():
-                Innovation.objects.filter(id=id)\
-                    .update(status_substantiation=form.cleaned_data.get('status_substantiation'),
-                            status=form.cleaned_data.get('status'))
-            return redirect("single", id=id)
-    else:
-        return render(request, "permission_denied.html")
+    if request.method == 'GET':
+        form = StatusUpdateForm()
+        form.fields["status"].choices = available_status_choices(request.user, innovation)
+        return render(request, "innovations/update_status.html", {"form": form})
+    if request.method == "POST":
+        form = StatusUpdateForm(data=request.POST)
+        if form.is_valid():
+            status = form.cleaned_data.get('status')
+            status_substantiation = form.cleaned_data.get('status_substantiation'),
+            if try_update_status(request.user, innovation, status, status_substantiation):
+                return redirect("details", id=id)
+            else:
+                return render(request, "permission_denied.html")
 
 
 def is_forbidden(status, user):
@@ -228,68 +208,5 @@ def get_previous_vote(innovation_id, user_id):
 def has_voting_access(user, innovation):
     has_voting_status = innovation.status in [Innovation.Status.VOTING]
     has_voting_privileges = (in_group(user, students) and innovation.student_grade_weight) or \
-                            (in_group(user, committee_members) and innovation.employee_grade_weight)
+                            (in_group(user, employees) and innovation.employee_grade_weight)
     return has_voting_status and has_voting_privileges
-
-
-def all_innovation_statuses():
-    return [
-        getattr(Innovation.Status, status)
-        for status in dir(Innovation.Status)
-        if isinstance(status, str) and not status.startswith("__")
-    ]
-
-
-def innovation_list(request):
-    innovations = Innovation.objects.filter(status='voting').order_by('timestamp')
-    suspended = Innovation.objects.filter(status='suspended').order_by('timestamp')
-    pending = Innovation.objects.filter(status='pending').order_by('timestamp')
-    blocked = Innovation.objects.filter(status='blocked').order_by('timestamp')
-    details = Innovation.objects.filter(status='in_replenishment').order_by('timestamp')
-    template = loader.get_template('innovation_list.html')
-    context = {
-        'innovations': innovations,
-        'suspended': suspended,
-        }
-    return HttpResponse(template.render(context, request))
-
-
-def rejected_list(request):
-    rejected = Innovation.objects.filter(status='rejected').order_by('timestamp')
-    approved = Innovation.objects.filter(status='accepted').order_by('timestamp')
-    template = loader.get_template('closed_list.html')
-    context = {
-        'rejected': rejected,
-        'approved': approved,
-        }
-    return HttpResponse(template.render(context, request))
-
-
-def admin_list(request):
-    pending = Innovation.objects.filter(status='pending').order_by('timestamp')
-    blocked = Innovation.objects.filter(status='blocked').order_by('timestamp')
-    details = Innovation.objects.filter(status='IN_REPLENISHMENT').order_by('timestamp')
-    template = loader.get_template('admin_list.html')
-    context = {
-        'blocked': blocked,
-        'pending': pending,
-        'details': details,
-        }
-    return HttpResponse(template.render(context, request))
-
-
-def detail(request, idea_id):
-    template = loader.get_template('innovation_detail.html')
-    idea = Innovation.objects.filter(id=idea_id)
-    comments = Grade.objects.filter(innovation_id=idea_id)
-    context = {
-        'idea': idea,
-        'comments': comments,
-    }
-    return HttpResponse(template.render(context, request))
-
-
-def has_appraise_access(user, innovation):
-    has_appraise_status = innovation.status in [Innovation.Status.VOTING]
-    has_appraise_privileges = (in_groups(user, [committee_members]) and innovation.employee_grade_weight)
-    return has_appraise_status and has_appraise_privileges

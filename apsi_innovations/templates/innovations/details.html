@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load bootstrap_tags %}
+{% load user_tags %}
+{% block content %}
+    {% if innovation %}
+
+        {% if innovation.status == "blocked" and not request.user|has_group:"administrators" %}
+
+            <h3>This idea has been blocked by an administrator.</h3>
+
+        {% else %}
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {{ innovation.subject }}
+                </div>
+                <div class="panel-body">
+                    <p><h4>Description:</h4>
+                    {{ innovation.description }} </p>
+                    <p><h4>Assumptions:</h4>
+                    {{ innovation.assumptions }} </p>
+                    <p><h4>Benefits:</h4>
+                    {{ innovation.benefits }} </p>
+                    <p><h4>Cost:</h4>
+                    {{ innovation.costs }} </p>
+                </div>
+                <div class="panel-footer">
+                    {% if innovation.status == "voting" or innovation.status == "in_replenishment" %}
+                        {% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight %}
+                            <a href="{% url 'vote' id=innovation.id %}"
+                               class="btn btn-primary">VOTE</a>
+                        {% endif %}
+                    {% endif %}
+                    <a href="{% url 'report_violation' id=innovation.id %}" class="btn btn-primary">REPORT</a>
+                    {% if request.user|has_group:"committee_members" or  request.user|has_group:"administrators" %}
+                        <a href="{% url 'update_status' id=innovation.id %}">
+                            <button type="submit" class="btn btn-danger pull-right">Change status</button>
+                        </a>
+                        {% if innovation.status == "pending" or innovation.status == "in_replenishment" %}
+                            <a href="{% url 'set_status' id=innovation.id status="voting" %}">
+                                <button type="submit" class="btn btn-danger pull-right">Start voting</button>
+                            </a>
+                        {% endif %}
+                        {# TODO consider adding more fast set_status buttons. #}
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+
+        <h3>Comments:</h3>
+
+        {% if comments %}
+
+            {% for grade in comments %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Ocena: {{ grade.value }}
+                    </div>
+                    <div class="panel-body">
+                        {{ grade.description }}
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <p>No comments.</p>
+        {% endif %}
+
+
+    {% else %}
+        <p>No innovation details.</p>
+    {% endif %}
+{% endblock %}
