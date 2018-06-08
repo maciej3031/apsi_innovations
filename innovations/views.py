@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 from django.views.generic import CreateView, UpdateView, ListView
 
-from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, StatusUpdateForm
+from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, StatusUpdateForm, WeightForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
 from innovations.status_flow import try_update_status, available_status_choices
 from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
@@ -180,6 +180,24 @@ def update_status(request, id):
                 return redirect("details", id=id)
             else:
                 return render(request, "permission_denied.html")
+
+
+@login_required
+def update_weights(request, id):
+    innovation = get_object_or_404(Innovation, id=id)
+    if in_group(request.user, administrators):
+        if request.method == 'GET':
+            form = WeightForm()
+            return render(request, "innovations/update_weights.html", {"form": form})
+        if request.method == 'POST':
+            form = WeightForm(data=request.POST)
+            if form.is_valid():
+                innovation.student_grade_weight = form.cleaned_data.get('student_grade_weight')
+                innovation.employee_grade_weight = form.cleaned_data.get('employee_grade_weight')
+                innovation.save()
+            return redirect("details", id=id)
+    else:
+        return render(request, "permission_denied.html")
 
 
 def is_forbidden(status, user):

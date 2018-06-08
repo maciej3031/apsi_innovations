@@ -8,6 +8,9 @@
             <div class="panel-heading">
                 <a href={% url 'details' id=innovation.id %}>{{ innovation.subject }}</a>
                 <div class="btn btn-xs pull-right">{{ innovation.status }}</div>
+                {% if request.user|has_group:"administrators" %}
+                    <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">Change weights</a>
+                {% endif %}
             </div>
             <div class="panel-body">
                 {{ innovation.description }}
