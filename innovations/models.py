@@ -2,6 +2,7 @@ from enum import Enum
 
 from django.contrib.auth.models import User
 from django.db import models
+from innovations.grades import calculate_innovation_grade
 
 
 class Innovation(models.Model):
@@ -24,6 +25,7 @@ class Innovation(models.Model):
         (Status.VOTING, 'Voting'),
     )
 
+    id = models.IntegerField(primary_key=True)
     subject = models.CharField(max_length=128)
     description = models.TextField(max_length=1024)
     assumptions = models.CharField(max_length=1024)
@@ -37,6 +39,11 @@ class Innovation(models.Model):
                                                 default=1.0)
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name='Time Added')
     issuer = models.ForeignKey(User, related_name='innovations', on_delete=models.deletion.CASCADE)
+
+    @property
+    def grade(self):
+        grades = Grade.objects.filter(innovation_id=self.id)
+        return calculate_innovation_grade(grades, self.student_grade_weight, self.employee_grade_weight)
 
 
 class Keyword(models.Model):
