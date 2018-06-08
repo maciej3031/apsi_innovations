@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load bootstrap_tags %}
+{% load user_tags %}
+{% block content %}
+{% if users %}
+    {% for user in users %}
+        <p><h4>User ID:</h4>
+        {{ user.id }} </p>
+        <p><h4>First Name:</h4>
+        {{ user.first_name }} </p>
+        <p><h4>Last Name:</h4>
+        {{ user.last_name }} </p>
+        <p><h4>Username:</h4>
+        {{ user.username }} </p>
+        <p><h4>Email:</h4>
+        {{ user.email }} </p>
+        {% if request.user|has_group:"administrators" and not user.is_active %}
+                            <!--" zły url, tylko do testów-->
+            <a href="{% url 'vote' id=user.id %} class="btn btn-primary">ACTIVATE USER</a>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% endblock %}
+

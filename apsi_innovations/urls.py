@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
-
+from apsi_innovations.views import users
 
 urlpatterns = [
     path(r'admin/', admin.site.urls),
@@ -26,6 +26,7 @@ urlpatterns = [
     path(r'innovations/', include('innovations.urls')),
     path(r'accounts/', include('django.contrib.auth.urls')),
     path(r'socials/', include('socials.urls')),
+    path('users/', users, name='users'),
 ]
 
 if settings.DEBUG:
