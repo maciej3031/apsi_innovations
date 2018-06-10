@@ -3,22 +3,40 @@
 {% load user_tags %}
 {% block content %}
 {% if users %}
-    {% for user in users %}
-        <p><h4>User ID:</h4>
-        {{ user.id }} </p>
-        <p><h4>First Name:</h4>
-        {{ user.first_name }} </p>
-        <p><h4>Last Name:</h4>
-        {{ user.last_name }} </p>
-        <p><h4>Username:</h4>
-        {{ user.username }} </p>
-        <p><h4>Email:</h4>
-        {{ user.email }} </p>
-        {% if request.user|has_group:"administrators" and not user.is_active %}
-                            <!--" zły url, tylko do testów-->
-            <a href="{% url 'vote' id=user.id %} class="btn btn-primary">ACTIVATE USER</a>
-        {% endif %}
-    {% endfor %}
+	<div class="conteiner">
+		<table class="hovered-table">
+			<thead>
+				<tr>
+					<th>UserID</th>
+					<th>Username</th>
+					<th>First Name</th>
+					<th>Last Name</th>					
+					<th>Email</th>
+					{% if request.user|has_group:"administrators" %}
+					<th>Activation</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for user in users %}
+					<tr>
+						<th>{{ user.id }}</th>
+						<th>{{ user.username }}</th>
+						<th>{{ user.first_name }}</th>
+						<th>{{ user.last_name }}</th>
+						<th>{{ user.email }}</th>
+						{% if request.user|has_group:"administrators" %}
+							{% if not user.is_active %}
+							<!--" zły url, tylko do testów-->
+								<a href="{% url 'vote' id=user.id %} class="btn btn-success">ACTIVATE</a>
+							{% else %}
+								<a href="{% url 'vote' id=user.id %} class="btn btn-danger">DEACTIVATE</a>
+							{% endif %}
+						{% endif %}	
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
 {% endif %}
 {% endblock %}
 
