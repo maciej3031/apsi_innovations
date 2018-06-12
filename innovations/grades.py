@@ -1,18 +1,17 @@
-def calculate_innovation_grade(grades, student_grade_weight, employee_grade_weight):
-    aggregate_grade = 0
-    number_of_votes = len(grades)
-    if number_of_votes > 0:
-        for grade in grades:
-            aggregate_grade += get_user_grade(grade,  student_grade_weight, employee_grade_weight)
-        return aggregate_grade/number_of_votes
-    else:
-        return None
+from signup.groups import in_group, employees, students
 
 
-def get_user_grade(grade, student_grade_weight, employee_grade_weight):
-    if grade.user.groups.filter(name='students'):
-        return float(student_grade_weight * grade.value)
-    elif grade.user.groups.filter(name='committee_members'):
-        return float(employee_grade_weight * grade.value)
+def calculate_innovation_grade(grades):
+    values_grades_pairs = [(grade.value, get_grade_weight(grade)) for grade in grades]
+    sum_of_grades = sum(v * w for v, w in values_grades_pairs)
+    sum_of_weights = sum(w for _, w in values_grades_pairs)
+    return sum_of_grades / sum_of_weights if sum_of_weights else None
+
+
+def get_grade_weight(grade):
+    if in_group(grade.user, employees):
+        return grade.innovation.employee_grade_weight
+    elif in_group(grade.user, students):
+        return grade.innovation.student_grade_weight
     else:
-        raise ValueError('Grade given by user without privileges')
+        return 0

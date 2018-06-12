@@ -25,7 +25,6 @@ class Innovation(models.Model):
         (Status.VOTING, 'Voting'),
     )
 
-    id = models.IntegerField(primary_key=True)
     subject = models.CharField(max_length=128)
     description = models.TextField(max_length=1024)
     assumptions = models.CharField(max_length=1024)
@@ -42,8 +41,8 @@ class Innovation(models.Model):
 
     @property
     def grade(self):
-        grades = Grade.objects.filter(innovation_id=self.id)
-        return calculate_innovation_grade(grades, self.student_grade_weight, self.employee_grade_weight)
+        grades = Grade.objects.filter(innovation=self)
+        return calculate_innovation_grade(grades)
 
 
 class Keyword(models.Model):
