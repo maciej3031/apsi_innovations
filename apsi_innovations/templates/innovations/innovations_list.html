@@ -18,6 +18,11 @@
             <div class="panel-body">
                 {{ innovation.description }}
             </div>
+                <div class="panel-footer">
+			    {% if request.user|has_group:"administrators" %}
+                   <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary btn-sm">Change weights</a>
+                {% endif %}
+		</div>
         </div>
     {% endfor %}
 

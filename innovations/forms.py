@@ -32,3 +32,9 @@ class GradeForm(forms.ModelForm):
     class Meta:
         model = Grade
         fields = ['value', 'description']
+
+
+class WeightForm(forms.ModelForm):
+    class Meta:
+        model = Innovation
+        fields = ['student_grade_weight', 'employee_grade_weight']

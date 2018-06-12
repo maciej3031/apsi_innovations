@@ -4,7 +4,8 @@ from django.views.generic import TemplateView
 from . import views
 
 from innovations.views import set_status, InnovationAddView, ReportViolationView, \
-    reported_violations, finish_violation_report, vote, update_status, InnovationUpdateView, InnovationListView
+    reported_violations, finish_violation_report, vote, update_status, InnovationUpdateView, InnovationListView,\
+    update_weights
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name="innovations/innovations_home.html")),
@@ -18,4 +19,5 @@ urlpatterns = [
     path('details/<int:id>', views.details, name='details'),
     path('update_status/<int:id>', update_status, name='update_status'),
     path('edit_innovation/<int:pk>', InnovationUpdateView.as_view(), name='edit_innovation'),
+    path('update_weights/<int:id>/', update_weights, name='update_weights'),
 ]
