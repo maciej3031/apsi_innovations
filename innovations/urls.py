@@ -5,7 +5,7 @@ from . import views
 
 from innovations.views import set_status, InnovationAddView, ReportViolationView, \
     reported_violations, finish_violation_report, vote, student_employee_profile, update_status, InnovationUpdateView, \
-    InnovationListView, update_weights
+    InnovationListView
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name="innovations/innovations_home.html")),
@@ -13,7 +13,6 @@ urlpatterns = [
     path('add_innovation/', InnovationAddView.as_view(), name='add_innovation'),
     path('set_status/<int:id>/<str:status>/', set_status, name='set_status'),
     path('vote/<int:id>/', vote, name='vote'),
-    path('update_weights/<int:id>/', update_weights, name='update_weights'),
     path('report_violation/<int:id>', ReportViolationView.as_view(), name='report_violation'),
     path('reported_violations/', reported_violations, name='reported_violations'),
     path('finish_violation_report/', finish_violation_report, name='finish_violation_report'),
