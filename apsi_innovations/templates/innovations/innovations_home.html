@@ -3,7 +3,7 @@
 {% block content %}
 
     {% if request.user|has_group:"students" or request.user|has_group:"employees" %}
-        <a href="/innovations/student_employee_profile/">MY PROFILE</a> <BR>
+        <a href="/student_employee_profile/">MY PROFILE</a> <BR>
     {% endif %}
 
     {% if request.user|has_group:"committee_members" or request.user|has_group:"administrators" %}

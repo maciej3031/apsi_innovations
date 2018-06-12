@@ -11,7 +11,6 @@ from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm,
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
 from innovations.status_flow import try_update_status, available_status_choices
 from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
-from socials.models import Comment, SocialPost
 
 
 class InnovationAddView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
@@ -85,18 +84,6 @@ class InnovationListView(LoginRequiredMixin, ListView):
         if not has_confidential_access(user):
             queryset = queryset.exclude(status__in=get_confidential_statuses())
         return queryset
-
-
-@login_required
-def student_employee_profile(request):
-    if not in_groups(request.user, [students, employees]):
-        return render(request, "permission_denied.html")
-    data = {
-        "innovations": Innovation.objects.filter(issuer=request.user),
-        "posts": SocialPost.objects.filter(issuer=request.user),
-        "comments": Comment.objects.filter(issuer=request.user)
-    }
-    return render(request, "innovations/student_employee_profile_view.html", data)
 
 
 @login_required
