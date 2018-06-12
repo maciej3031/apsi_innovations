@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load bootstrap_tags %}
+{% load user_tags %}
+{% block content %}
+{% if request.user|has_group:"administrators" %}
+    <div class="conteiner">
+        <h1> Admin profile</h1>
+        <a href="{% url 'users' %}" class="btn btn-primary btn-lg btn-block" role="button" aria-pressed="true">MANAGE USERS ACCOUNTS</a>
+        <a href="{% url 'innovations' %}" class="btn btn-primary btn-lg btn-block" role="button" aria-pressed="true">EDIT IDEAS</a>
+    </div>
+{% endif %}
+{% endblock %}

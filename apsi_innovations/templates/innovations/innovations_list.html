@@ -6,12 +6,23 @@
     {% for innovation in innovation_list %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <a href={% url 'details' id=innovation.id %}>{{ innovation.subject }}</a>
-                <div class="btn btn-xs pull-right">{{ innovation.status }}</div>
+				<div class="row">
+					<div class="col-lg-6">
+							<h4><a href={% url 'details' id=innovation.id %}>{{ innovation.subject }}</a></h4>
+					</div>
+					<div class="col-lg-6">
+							<button class="btn btn-sm pull-right">{{ innovation.status }}</button>
+					</div>
+				</div>
             </div>
             <div class="panel-body">
                 {{ innovation.description }}
             </div>
+                <div class="panel-footer">
+			    {% if request.user|has_group:"administrators" %}
+                   <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
+                {% endif %}
+		        </div>
         </div>
     {% endfor %}
 

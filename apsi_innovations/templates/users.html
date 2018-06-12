@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load bootstrap_tags %}
+{% load user_tags %}
+{% block content %}
+{% if users %}
+	<div class="conteiner">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>UserID</th>
+					<th>Username</th>
+					<th>First Name</th>
+					<th>Last Name</th>					
+					<th>Email</th>
+					{% if request.user|has_group:"administrators" %}
+					<th>Activation</th>
+					<th>Committee membership</th>
+					{% endif %}
+				</tr>
+			</thead>
+			<tbody>
+				{% for user in users %}
+					<tr>
+						<th>{{ user.id }}</th>
+						<th>{{ user.username }}</th>
+						<th>{{ user.first_name }}</th>
+						<th>{{ user.last_name }}</th>
+						<th>{{ user.email }}</th>
+						{% if request.user|has_group:"administrators" %}
+							{% if not user.is_active %}
+								<th><a href="{% url 'activate_user' %}?action=accept&id={{ user.id }}">
+                    			<button type="submit" class="btn btn-success pull-right">ACTIVATE</button></a></th>
+							{% else %}
+								<th><a href="{% url 'activate_user' %}?action=block&id={{ user.id }}">
+                    			<button type="submit" class="btn btn-danger pull-right">DEACTIVATE</button></a></th>
+							{% endif %}
+							{% if not user|has_group:"committee_members" %}
+								<th><a href="{% url 'activate_committee' %}?action=accept&id={{ user.id }}">
+                    			<button type="submit" class="btn btn-success pull-right">ADD</button></a></th>
+							{% else %}
+								<th><a href="{% url 'activate_committee' %}?action=block&id={{ user.id }}">
+                    			<button type="submit" class="btn btn-danger pull-right">DELETE</button></a></th>
+							{% endif %}
+						{% endif %}
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endif %}
+{% endblock %}
