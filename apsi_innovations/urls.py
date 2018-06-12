@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
-from apsi_innovations.views import users
+from apsi_innovations.views import users, admin_profile, activate_user, activate_committee
 
 urlpatterns = [
     path(r'admin/', admin.site.urls),
@@ -26,7 +26,10 @@ urlpatterns = [
     path(r'innovations/', include('innovations.urls')),
     path(r'accounts/', include('django.contrib.auth.urls')),
     path(r'socials/', include('socials.urls')),
-    path('users/', users, name='users'),
+    path(r'users/', users, name='users'),
+    path(r'admin_profile/', admin_profile, name='admin_profile'),
+    path(r'activate_user/', activate_user, name='activate_user'),
+    path(r'activate_committee/', activate_committee, name='activate_committee'),
 ]
 
 if settings.DEBUG:

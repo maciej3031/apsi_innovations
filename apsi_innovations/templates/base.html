@@ -36,7 +36,7 @@
                 <li><a href="{% url 'add_innovation' %}">Add innovation</a></li>
                 <li><a href="{% url 'social_posts' %}">Inspirations</a></li>
                 {% if request.user|has_group:"administrators" %}
-                    <li><a href="{% url 'innovations' %}">Admin profile</a></li>
+                    <li><a href="{% url 'admin_profile' %}">Admin profile</a></li>
                 {% endif %}
             {% endif %}
 

@@ -4,7 +4,7 @@
 {% block content %}
 {% if users %}
 	<div class="conteiner">
-		<table class="hovered-table">
+		<table class="table">
 			<thead>
 				<tr>
 					<th>UserID</th>
@@ -14,6 +14,7 @@
 					<th>Email</th>
 					{% if request.user|has_group:"administrators" %}
 					<th>Activation</th>
+					<th>Committee membership</th>
 					{% endif %}
 				</tr>
 			</thead>
@@ -27,12 +28,20 @@
 						<th>{{ user.email }}</th>
 						{% if request.user|has_group:"administrators" %}
 							{% if not user.is_active %}
-							<!--" zły url, tylko do testów-->
-								<a href="{% url 'vote' id=user.id %} class="btn btn-success">ACTIVATE</a>
+								<th><a href="{% url 'activate_user' %}?action=accept&id={{ user.id }}">
+                    			<button type="submit" class="btn btn-success pull-right">ACTIVATE</button></a></th>
 							{% else %}
-								<a href="{% url 'vote' id=user.id %} class="btn btn-danger">DEACTIVATE</a>
+								<th><a href="{% url 'activate_user' %}?action=block&id={{ user.id }}">
+                    			<button type="submit" class="btn btn-danger pull-right">DEACTIVATE</button></a></th>
 							{% endif %}
-						{% endif %}	
+							{% if not user|has_group:"committee_members" %}
+								<th><a href="{% url 'activate_committee' %}?action=accept&id={{ user.id }}">
+                    			<button type="submit" class="btn btn-success pull-right">ADD</button></a></th>
+							{% else %}
+								<th><a href="{% url 'activate_committee' %}?action=block&id={{ user.id }}">
+                    			<button type="submit" class="btn btn-danger pull-right">DELETE</button></a></th>
+							{% endif %}
+						{% endif %}
 					</tr>
 				{% endfor %}
 			</tbody>
@@ -40,4 +49,3 @@
 	</div>
 {% endif %}
 {% endblock %}
-
