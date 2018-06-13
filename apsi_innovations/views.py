@@ -16,11 +16,11 @@ def users(request):
 
 
 @login_required
-def admin_profile(request):
+def admin_panel(request):
     if not has_admin_access(request.user):
         return render(request, "permission_denied.html")
     else:
-        return render(request, "admin_profile.html")
+        return render(request, "admin_panel.html")
 
 
 @login_required
@@ -30,6 +30,8 @@ def activate_user(request):
         return render(request, "permission_denied.html")
     action = request.GET.get("action")
     user = User.objects.get(id=int(request.GET.get("id")))
+    if user == request.user:
+        return redirect("users")
     if action == "accept":
         user.is_active = True
         user.save()
