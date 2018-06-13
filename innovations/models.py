@@ -1,7 +1,6 @@
-from enum import Enum
-
 from django.contrib.auth.models import User
 from django.db import models
+
 from innovations.grades import calculate_innovation_grade
 
 
@@ -27,7 +26,7 @@ class Innovation(models.Model):
 
     subject = models.CharField(max_length=128)
     description = models.TextField(max_length=1024)
-    assumptions = models.CharField(max_length=1024)
+    assumptions = models.TextField(max_length=1024)
     benefits = models.CharField(max_length=1024)
     costs = models.CharField(max_length=1024)
     status = models.CharField(choices=STATUS_CHOICES, max_length=32, default=Status.PENDING)
