@@ -13,7 +13,7 @@ class InnovationAddForm(forms.ModelForm):
 
     class Meta:
         model = Innovation
-        fields = ['subject', 'description', 'benefits', 'costs']
+        fields = ['subject', 'description', 'assumptions', 'benefits', 'costs']
 
 
 class StatusUpdateForm(forms.ModelForm):
