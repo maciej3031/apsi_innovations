@@ -101,8 +101,8 @@ def get_status_votes_table(innovation):
             [
                 s,
                 v,
-                "{}%".format((v / number_of_committee_members) * 100),
                 number_of_committee_members,
+                "{}%".format((v / number_of_committee_members) * 100),
                 get_substantiation(innovation, status=s)
             ] for s, v in counter.items()
         ]
