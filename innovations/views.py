@@ -124,11 +124,11 @@ def vote_status(request, id):
     substantiation = request.POST.get("substantiation")
     if not status in available_statuses(request.user, innovation):
         return render(request, "permission_denied.html")
-    vote = StatusVote.objects.get_or_create(innovation=innovation, user=request.user)
+    vote, _ = StatusVote.objects.get_or_create(innovation=innovation, user=request.user)
     vote.proposed_status = status
     vote.substantiation = substantiation
     vote.save()
-    try_finish_status_voting(innovation, status)
+    try_finish_status_voting(innovation)
     return redirect("details", id=id)
 
 

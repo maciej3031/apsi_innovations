@@ -12,7 +12,15 @@
 
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    {{ innovation.subject }}
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h4><a href={% url 'details' id=innovation.id %}>{{ innovation.subject }}</a></h4>
+                        </div>
+                        <div class="col-lg-6">
+                            <button class="btn btn-sm pull-right">{{ innovation.status }}</button>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="panel-body">
                     <p><h4>Description:</h4>
@@ -68,13 +76,11 @@
                                         <td>{{ value }}</td>
                                     {% endfor %}
                                     <td>
-                                        <form action={% url 'try_finish_status_voting' id=innovation.id %}  method="post" enctype="text/plain">
+                                        <form method="post" action={% url 'vote_status' id=innovation.id %}>
                                             {% csrf_token %}
-                                            <div>
-                                                <input name="substantiation"/>
-                                                <input name="status" hidden="hidden" value= {{ row.0 }}  %}>
-                                                <input type="submit" value="VOTE" />
-                                            </div>
+                                            <input name="substantiation"/>
+                                            <input name="status" hidden="hidden" value={{ row.0 }}  %}>
+                                            <input type="submit" value="VOTE" class="btn btn-primary"/>
                                         </form>
                                     </td>
                                 </tr>

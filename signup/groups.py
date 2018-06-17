@@ -1,4 +1,4 @@
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 
 students, _ = Group.objects.get_or_create(name='students')
 employees, _ = Group.objects.get_or_create(name='employees')
@@ -13,3 +13,7 @@ def in_group(user, group):
 def in_groups(user, groups):
     """True if user is in any of provided groups."""
     return any([in_group(user, group) for group in groups])
+
+
+def get_number_of_members(group):
+    return group.user_set.count()

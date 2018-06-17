@@ -2,12 +2,11 @@ from django.urls import path
 from django.conf.urls import url
 from django.views.generic import TemplateView
 
-from innovations.status_flow import try_finish_status_voting
 from . import views
 
 from innovations.views import set_status, InnovationAddView, ReportViolationView, \
-    reported_violations, finish_violation_report, vote, update_status, InnovationUpdateView, InnovationListView,\
-    update_weights
+    reported_violations, finish_violation_report, vote, update_status, InnovationUpdateView, InnovationListView, \
+    update_weights, vote_status
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name="innovations/innovations_home.html")),
@@ -20,7 +19,7 @@ urlpatterns = [
     path('finish_violation_report/', finish_violation_report, name='finish_violation_report'),
     path('details/<int:id>', views.details, name='details'),
     path('update_status/<int:id>', update_status, name='update_status'),
-    path('try_finish_status_voting/<int:id>/', try_finish_status_voting, name='try_finish_status_voting'),
+    path('vote_status/<int:id>/', vote_status, name='vote_status'),
     path('edit_innovation/<int:pk>', InnovationUpdateView.as_view(), name='edit_innovation'),
     path('update_weights/<int:id>/', update_weights, name='update_weights'),
 ]
