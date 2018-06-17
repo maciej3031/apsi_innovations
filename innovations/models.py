@@ -80,3 +80,10 @@ class ViolationReport(models.Model):
     closing_date = models.DateTimeField(default=None, null=True, blank=True)
     issuer = models.ForeignKey(User, related_name="violation_reports", on_delete=models.deletion.CASCADE)
     innovation = models.ForeignKey(Innovation, related_name='violation_reports', on_delete=models.deletion.CASCADE)
+
+
+class StatusVote(models.Model):
+    innovation = models.ForeignKey(Innovation, related_name="status_votes", on_delete=models.deletion.CASCADE)
+    user = models.ForeignKey(User, related_name="status_votes", on_delete=models.deletion.CASCADE)
+    proposed_status = models.CharField(choices=Innovation.STATUS_CHOICES, max_length=32)
+    substantiation = models.CharField(max_length=1024, verbose_name='Status Substantiation', null=True)

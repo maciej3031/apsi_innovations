@@ -1,15 +1,20 @@
+from collections import Counter
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template import RequestContext
 from django.utils.timezone import now
 from django.views.generic import CreateView, UpdateView, ListView
 
 from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, StatusUpdateForm, WeightForm
-from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
-from innovations.status_flow import try_update_status, available_status_choices
+from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport, \
+    StatusVote
+from innovations.status_flow import try_update_status, available_status_choices, available_statuses, \
+    try_finish_status_voting, get_status_votes_counter, get_status_votes_table
 from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
 
 
@@ -92,18 +97,38 @@ def details(request, id):
     if is_forbidden(innovation.status, request.user):
         raise Http404("Page not found!")
     comments = Grade.objects.filter(innovation=innovation)
+    status_votes_table = get_status_votes_table(innovation)
     context = {
         'innovation': innovation,
+        'status_votes_table': status_votes_table,
         'comments': comments,
     }
-    return render(request, "innovations/details.html", context)
+    return render(request, "innovations/details.html", context=context)
 
 
 @login_required
 @transaction.atomic
 def set_status(request, id, status):
+    if not in_group(request.user, administrators):
+        return render(request, "permission_denied.html")
     innovation = get_object_or_404(Innovation, id=id)
     try_update_status(request.user, innovation, status)
+    return redirect("details", id=id)
+
+
+@login_required
+@transaction.atomic
+def vote_status(request, id):
+    innovation = get_object_or_404(Innovation, id=id)
+    status = request.POST.get("status")
+    substantiation = request.POST.get("substantiation")
+    if not status in available_statuses(request.user, innovation):
+        return render(request, "permission_denied.html")
+    vote = StatusVote.objects.get_or_create(innovation=innovation, user=request.user)
+    vote.proposed_status = status
+    vote.substantiation = substantiation
+    vote.save()
+    try_finish_status_voting(innovation, status)
     return redirect("details", id=id)
 
 
@@ -153,6 +178,8 @@ def finish_violation_report(request):
 @login_required
 @transaction.atomic
 def update_status(request, id):
+    if not in_group(request.user, administrators):
+        return render(request, "permission_denied.html")
     innovation = get_object_or_404(Innovation, id=id)
     if request.method == 'GET':
         form = StatusUpdateForm()

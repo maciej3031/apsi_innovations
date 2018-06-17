@@ -28,7 +28,7 @@
                 </div>
                 <div class="panel-footer">
                     {% if request.user|has_group:"administrators" %}
-                       <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
+                        <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
                     {% endif %}
                     {% if innovation.status == "voting" or innovation.status == "in_replenishment" %}
                         {% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight %}
@@ -37,7 +37,9 @@
                         {% endif %}
                     {% endif %}
                     <a href="{% url 'report_violation' id=innovation.id %}" class="btn btn-primary">REPORT</a>
-                    {% if request.user|has_group:"committee_members" or  request.user|has_group:"administrators" %}
+
+                    {# ------------- ADMIN BUTTONS ---------------------#}
+                    {% if request.user|has_group:"administrators" %}
                         <a href="{% url 'update_status' id=innovation.id %}">
                             <button type="submit" class="btn btn-danger pull-right">Change status</button>
                         </a>
@@ -47,6 +49,37 @@
                             </a>
                         {% endif %}
                         {# TODO consider adding more fast set_status buttons. #}
+                    {% endif %}
+                </div>
+                <div class="panel-footer">
+                    {# ------------- COMMITTEE BUTTONS  / PANEL ---------------------#}
+                    {% if request.user|has_group:"committee_members" %}
+                        <table border="1">
+
+                            <tr>
+                                {% for header in status_votes_table.headers %}
+                                    <td>{{ header }}</td>
+                                {% endfor %}
+                                <td>New substantiation</td>
+                            </tr>
+                            {% for row in status_votes_table.rows %}
+                                <tr>
+                                    {% for value in row %}
+                                        <td>{{ value }}</td>
+                                    {% endfor %}
+                                    <td>
+                                        <form action={% url 'try_finish_status_voting' id=innovation.id %}  method="post" enctype="text/plain">
+                                            {% csrf_token %}
+                                            <div>
+                                                <input name="substantiation"/>
+                                                <input name="status" hidden="hidden" value= {{ row.0 }}  %}>
+                                                <input type="submit" value="VOTE" />
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
                     {% endif %}
                 </div>
             </div>
