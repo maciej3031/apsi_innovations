@@ -40,8 +40,8 @@
                     {% endif %}
                     {% if innovation.status == "voting" or innovation.status == "in_replenishment" %}
                         {% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight %}
-                            <a href="{% url 'vote' id=innovation.id %}"
-                               class="btn btn-primary">VOTE</a>
+                            <a href="{% url 'rate' id=innovation.id %}"
+                               class="btn btn-primary">RATE</a>
                         {% endif %}
                     {% endif %}
                     <a href="{% url 'report_violation' id=innovation.id %}" class="btn btn-primary">REPORT</a>

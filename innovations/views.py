@@ -133,14 +133,14 @@ def vote_status(request, id):
 
 
 @login_required
-def vote(request, id):
+def rate(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if get_previous_vote(id, request.user):
         return render(request, "voting_denied.html")
     if has_voting_access(request.user, innovation):
         if request.method == 'GET':
             form = GradeForm()
-            return render(request, "innovations/voting.html", {"form": form})
+            return render(request, "innovations/rating.html", {"form": form})
         if request.method == 'POST':
             form = GradeForm(data=request.POST)
             if form.is_valid():
