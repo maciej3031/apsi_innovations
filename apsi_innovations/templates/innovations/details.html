@@ -62,7 +62,8 @@
                 <div class="panel-footer">
                     {# ------------- COMMITTEE BUTTONS  / PANEL ---------------------#}
                     {% if request.user|has_group:"committee_members" %}
-                        <table border="1">
+                    <div class="table-responsive">
+                        <table border="1" class="table">
 
                             <tr>
                                 {% for header in status_votes_table.headers %}
@@ -86,6 +87,7 @@
                                 </tr>
                             {% endfor %}
                         </table>
+                    </div>
                     {% endif %}
                 </div>
             </div>
