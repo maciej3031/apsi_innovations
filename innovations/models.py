@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -72,6 +74,10 @@ class InnovationAttachment(models.Model):
 
     file = models.FileField(upload_to='attachments/', null=True)
     innovation = models.ForeignKey(Innovation, related_name='attachments', on_delete=models.deletion.CASCADE)
+
+    @property
+    def filename(self):
+        return os.path.basename(self.file.name)
 
 
 class ViolationReport(models.Model):
