@@ -44,13 +44,18 @@
                                class="btn btn-primary">RATE</a>
                         {% endif %}
                     {% endif %}
-                    <a href="{% url 'report_violation' id=innovation.id %}" class="btn btn-primary">REPORT</a>
+                    {% if not request.user|has_group:"administrators" %}
+                        <a href="{% url 'report_violation' id=innovation.id %}" class="btn btn-primary">REPORT</a>
+                    {% endif %}
+
 
                     {# ------------- ADMIN BUTTONS ---------------------#}
                     {% if request.user|has_group:"administrators" %}
-                        <a href="{% url 'update_status' id=innovation.id %}">
-                            <button type="submit" class="btn btn-danger pull-right">Change status</button>
-                        </a>
+                        {% if innovation.status != "blocked" %}
+                            <a href="{% url 'update_status' id=innovation.id %}">
+                                <button type="submit" class="btn btn-danger pull-right">Change status</button>
+                            </a>
+                        {% endif %}
                         {% if innovation.status == "pending" or innovation.status == "in_replenishment" %}
                             <a href="{% url 'set_status' id=innovation.id status="voting" %}">
                                 <button type="submit" class="btn btn-danger pull-right">Start voting</button>
@@ -62,32 +67,32 @@
                 <div class="panel-footer">
                     {# ------------- COMMITTEE BUTTONS  / PANEL ---------------------#}
                     {% if request.user|has_group:"committee_members" %}
-                    <div class="table-responsive">
-                        <table class="table">
+                        <div class="table-responsive">
+                            <table class="table">
 
-                            <tr>
-                                {% for header in status_votes_table.headers %}
-                                    <td>{{ header }}</td>
-                                {% endfor %}
-                                <td>New substantiation</td>
-                            </tr>
-                            {% for row in status_votes_table.rows %}
                                 <tr>
-                                    {% for value in row %}
-                                        <td>{{ value }}</td>
+                                    {% for header in status_votes_table.headers %}
+                                        <td>{{ header }}</td>
                                     {% endfor %}
-                                    <td>
-                                        <form method="post" action={% url 'vote_status' id=innovation.id %}>
-                                            {% csrf_token %}
-                                            <input name="substantiation"/>
-                                            <input name="status" hidden="hidden" value={{ row.0 }}  %}>
-                                            <input type="submit" value="VOTE" class="btn btn-primary"/>
-                                        </form>
-                                    </td>
+                                    <td>New substantiation</td>
                                 </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
+                                {% for row in status_votes_table.rows %}
+                                    <tr>
+                                        {% for value in row %}
+                                            <td>{{ value }}</td>
+                                        {% endfor %}
+                                        <td>
+                                            <form method="post" action={% url 'vote_status' id=innovation.id %}>
+                                                {% csrf_token %}
+                                                <input name="substantiation"/>
+                                                <input name="status" hidden="hidden" value={{ row.0 }}  %}>
+                                                <input type="submit" value="VOTE" class="btn btn-primary"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
                     {% endif %}
                 </div>
             </div>

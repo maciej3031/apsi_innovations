@@ -194,6 +194,7 @@ def update_status(request, id):
                 return redirect("details", id=id)
             else:
                 return render(request, "permission_denied.html")
+    return render(request, "permission_denied.html")  # In case of strange data in form.
 
 
 @login_required
