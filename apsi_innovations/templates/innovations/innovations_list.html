@@ -16,7 +16,17 @@
 				</div>
             </div>
             <div class="panel-body">
+                <p>
                 {{ innovation.description }}
+				</p>
+				{% if innovation.keywords.all %}
+					<p>
+						<b>Keywords:</b>
+						{% for keyword in innovation.keywords.all %}
+							{{ keyword.keyword }},
+						{% endfor %}
+					</p>
+				{% endif %}
             </div>
                 <div class="panel-footer">
 			    {% if request.user|has_group:"administrators" %}
@@ -41,7 +51,4 @@
             </span>
         </div>
     {% endif %}
-
-
 {% endblock %}
-

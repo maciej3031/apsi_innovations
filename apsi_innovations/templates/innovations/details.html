@@ -28,37 +28,44 @@
 
                     <p><h4>Keywords: </h4> </p>
                     {% for keyword in innovation.keywords.all %}
-                        {{ keyword.keyword }} <br/>
-                    {% endfor %}
-
-                    <p><h4>Attachments: </h4></p>
-                    {% for attachment in innovation.attachments.all %}
-                        <a href='{{ attachment.file.url }}'>{{ attachment.file }}</a><br>
+                        {{ keyword.keyword }}, 
                     {% endfor %}
 
                 </div>
                 <div class="panel-footer">
-                    {% if request.user|has_group:"administrators" %}
-                        <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
-                    {% endif %}
-                    {% if innovation.status == "voting" or innovation.status == "in_replenishment" %}
-                        {% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight %}
-                            <a href="{% url 'vote' id=innovation.id %}"
-                               class="btn btn-primary">VOTE</a>
-                        {% endif %}
-                    {% endif %}
-                    <a href="{% url 'report_violation' id=innovation.id %}" class="btn btn-primary">REPORT</a>
-                    {% if request.user|has_group:"committee_members" or  request.user|has_group:"administrators" %}
-                        <a href="{% url 'update_status' id=innovation.id %}">
-                            <button type="submit" class="btn btn-danger pull-right">Change status</button>
-                        </a>
-                        {% if innovation.status == "pending" or innovation.status == "in_replenishment" %}
-                            <a href="{% url 'set_status' id=innovation.id status="voting" %}">
-                                <button type="submit" class="btn btn-danger pull-right">Start voting</button>
-                            </a>
-                        {% endif %}
-                        {# TODO consider adding more fast set_status buttons. #}
-                    {% endif %}
+					<p>
+						{% if request.user|has_group:"administrators" %}
+							<a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
+						{% endif %}
+						{% if innovation.status == "voting" or innovation.status == "in_replenishment" %}
+							{% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight %}
+								<a href="{% url 'vote' id=innovation.id %}"
+								   class="btn btn-primary">VOTE</a>
+							{% endif %}
+						{% endif %}
+						<a href="{% url 'report_violation' id=innovation.id %}" class="btn btn-primary">REPORT</a>
+						{% if request.user|has_group:"committee_members" or  request.user|has_group:"administrators" %}
+							<a href="{% url 'update_status' id=innovation.id %}">
+								<button type="submit" class="btn btn-danger pull-right">Change status</button>
+							</a>
+							{% if innovation.status == "pending" or innovation.status == "in_replenishment" %}
+								<a href="{% url 'set_status' id=innovation.id status="voting" %}">
+									<button type="submit" class="btn btn-danger pull-right">Start voting</button>
+								</a>
+							{% endif %}
+							{# TODO consider adding more fast set_status buttons. #}
+						{% endif %}
+					</p>
+					{% if innovation.attachments.all %}
+						<p>
+						<h5>Attachments:</h5>
+						</p>
+						<p>
+							{% for attachment in innovation.attachments.all %}
+								<a href='{{ attachment.file.url }}' class="btn btn-success">{{ attachment.file }}</a>
+							{% endfor %}
+						</p>
+					{% endif %}
                 </div>
             </div>
         {% endif %}
