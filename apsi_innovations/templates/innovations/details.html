@@ -63,7 +63,7 @@
                     {# ------------- COMMITTEE BUTTONS  / PANEL ---------------------#}
                     {% if request.user|has_group:"committee_members" %}
                     <div class="table-responsive">
-                        <table border="1" class="table">
+                        <table class="table">
 
                             <tr>
                                 {% for header in status_votes_table.headers %}

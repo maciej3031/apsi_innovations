@@ -1,9 +1,5 @@
 from collections import Counter
 
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.views.decorators.csrf import csrf_protect
-
 from innovations.models import Innovation, StatusVote
 from signup.groups import committee_members, administrators, in_groups, get_number_of_members
 
@@ -66,7 +62,7 @@ def available_statuses_for_comittee(innovation):
 
 
 def try_finish_status_voting(innovation):
-    status_votes = StatusVote.objects.filter(innovation=innovation)
+    status_votes = innovation.status_votes.all()
     counter = Counter([vote.proposed_status for vote in status_votes])
     threshold = get_number_of_members(committee_members) / 2
     for status, votes_number in counter.items():
@@ -84,7 +80,7 @@ def try_finish_status_voting(innovation):
 
 
 def get_status_votes_counter(innovation):
-    status_votes = StatusVote.objects.filter(innovation=innovation)
+    status_votes = innovation.status_votes.all()
     counter = Counter([vote.proposed_status for vote in status_votes])
     for status in available_statuses_for_comittee(innovation):
         if status not in counter:
@@ -111,7 +107,7 @@ def get_status_votes_table(innovation):
 
 
 def get_substantiation(innovation, status=None):
-    statuses = StatusVote.objects.filter(innovation=innovation, substantiation__iregex=".+")
+    statuses = innovation.status_votes.all().filter(substantiation__iregex=".+")
     if status:
         statuses = statuses.filter(proposed_status=status)
     last_status = statuses.last()
