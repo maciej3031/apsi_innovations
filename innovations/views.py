@@ -92,9 +92,6 @@ class InnovationListView(LoginRequiredMixin, ListView):
 @login_required
 def innovation_comment(request, id):
     innovation = get_object_or_404(Innovation, id=id)
-    if request.method == 'GET':
-        form = InnovationCommentForm
-        return render(request, "innovations/comment.html", {"form": form})
     if request.method == 'POST':
         form = InnovationCommentForm(data=request.POST)
         if form.is_valid():
@@ -116,7 +113,8 @@ def details(request, id):
         'innovation': innovation,
         'status_votes_table': status_votes_table,
         'comments': comments,
-        'innovation_comments': innovation_comments
+        'innovation_comments': innovation_comments,
+        'form': InnovationCommentForm
     }
     return render(request, "innovations/details.html", context=context)
 
