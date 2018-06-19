@@ -1,18 +1,16 @@
-from collections import Counter
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
-from django.template import RequestContext
 from django.utils.timezone import now
 from django.views.generic import CreateView, UpdateView, ListView
 
-from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, StatusUpdateForm, WeightForm
+from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, StatusUpdateForm, WeightForm, \
+    InnovationCommentForm
 from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport, \
-    StatusVote
+    StatusVote, InnovationComment
 from innovations.status_flow import try_update_status, available_status_choices, available_statuses, \
     try_finish_status_voting, get_status_votes_counter, get_status_votes_table
 from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
@@ -92,16 +90,33 @@ class InnovationListView(LoginRequiredMixin, ListView):
 
 
 @login_required
+def innovation_comment(request, id):
+    innovation = get_object_or_404(Innovation, id=id)
+    if request.method == 'GET':
+        form = InnovationCommentForm
+        return render(request, "innovations/comment.html", {"form": form})
+    if request.method == 'POST':
+        form = InnovationCommentForm(data=request.POST)
+        if form.is_valid():
+            form.instance.innovation = innovation
+            form.instance.issuer = request.user
+            form.instance.save()
+        return redirect("details", id=id)
+
+
+@login_required
 def details(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if is_forbidden(innovation.status, request.user):
         raise Http404("Page not found!")
     comments = Grade.objects.filter(innovation=innovation)
+    innovation_comments = InnovationComment.objects.filter(innovation=innovation)
     status_votes_table = get_status_votes_table(innovation)
     context = {
         'innovation': innovation,
         'status_votes_table': status_votes_table,
         'comments': comments,
+        'innovation_comments': innovation_comments
     }
     return render(request, "innovations/details.html", context=context)
 

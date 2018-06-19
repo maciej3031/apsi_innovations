@@ -101,8 +101,7 @@
 
         <h3>Comments:</h3>
 
-        {% if comments %}
-
+        {% if comments or innovation_comments %}
             {% for grade in comments %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -110,6 +109,16 @@
                     </div>
                     <div class="panel-body">
                         {{ grade.description }}
+                    </div>
+                </div>
+            {% endfor %}
+            {% for comment in innovation_comments %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        {{ comment.issuer }}
+                    </div>
+                    <div class="panel-body">
+                        {{ comment.text }}
                     </div>
                 </div>
             {% endfor %}

@@ -87,3 +87,10 @@ class StatusVote(models.Model):
     user = models.ForeignKey(User, related_name="status_votes", on_delete=models.deletion.CASCADE)
     proposed_status = models.CharField(choices=Innovation.STATUS_CHOICES, max_length=32)
     substantiation = models.CharField(max_length=1024, verbose_name='Status Substantiation', null=True)
+
+
+class InnovationComment(models.Model):
+    text = models.CharField(max_length=4096)
+    issuer = models.ForeignKey(User, related_name='innovation_comments', on_delete=models.deletion.CASCADE)
+    innovation = models.ForeignKey(Innovation, related_name='innovation_comment', on_delete=models.deletion.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name='Time Added')
