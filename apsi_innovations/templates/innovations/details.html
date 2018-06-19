@@ -62,8 +62,7 @@
 						</p>
 						<p>
 							{% for attachment in innovation.attachments.all %}
-								<a href='{{ attachment.file.url }}' class="btn btn-success">{{ attachment.file }}</a>
-{#								<a href='{{ attachment.file.url }}' class="btn btn-success">{{ attachment.filename }}</a>#}
+								<a href='{{ attachment.file.url }}' class="btn btn-success">{{ attachment.filename }}</a>
 							{% endfor %}
 						</p>
 					{% endif %}
