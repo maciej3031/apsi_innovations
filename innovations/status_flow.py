@@ -107,7 +107,7 @@ def get_status_votes_table(innovation):
 
 
 def get_substantiation(innovation, status=None):
-    statuses = innovation.status_votes.all().filter(substantiation__iregex=".+")
+    statuses = innovation.status_votes.filter(substantiation__iregex=".+")
     if status:
         statuses = statuses.filter(proposed_status=status)
     last_status = statuses.last()
