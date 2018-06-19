@@ -41,6 +41,8 @@ class WeightForm(forms.ModelForm):
 
 
 class InnovationCommentForm(forms.ModelForm):
+    text = forms.CharField(label='')
+
     class Meta:
         model = InnovationComment
         fields = ['text']
