@@ -24,7 +24,7 @@
             <div class="panel panel-default">
         {% endif %}
     <div class="panel-heading ">
-        <a href="../innovation_details/{{ innovation.id }}/">{{ innovation.subject }} </a>
+        <a href={% url 'details' id=innovation.id %}>{{ innovation.subject }}</a>
         <p class="pull-right">Status: {{ innovation.status }}</p>
     </div>
     <div class="panel-body">
@@ -49,9 +49,17 @@
         </div>
         <div class="panel-body">
             {% for post in posts %}
-                <h3>{{ post.text }}</h3>
-                <h3>Added: {{ post.timestamp }}</h3>
-                <hr>
+           <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="{% url 'single_social_post' id=post.id %}">See post </a>
+                    <p class="pull-right">
+                    <small><i>{{ post.timestamp }}</i></small>
+                    </p>
+                 </div>
+                <div class="panel-body">
+                    {{ post.text|linebreaksbr }}
+                </div>
+            </div>
             {% endfor %}
         </div>
     </div>
@@ -64,46 +72,41 @@
 
         <div class="panel-body">
             {% for comment in comments %}
-                <h3>{{ comment.text }}</h3>
-                <h3>Related to post:
-                    <a href="{% url 'single_social_post' id=comment.social_post.id %}">{{ comment.social_post.id }} </a>
-                </h3>
-                <hr>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="{% url 'single_social_post' id=comment.social_post.id %}">See related post </a>
+                    <p class="pull-right">
+                    <small><i>{{ comment.timestamp }}</i></small>
+                    </p>
+                 </div>
+                <div class="panel-body">
+                    {{  comment.text|linebreaksbr }}
+                </div>
+            </div>
             {% endfor %}
         </div>
     </div>
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3>Feedback I gave</h3>
+            <h3>Feedback I gave:</h3>
         </div>
-
-        {% for grade in grades %}
+        <div class="panel-body">
+            {% for grade in grades %}
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <h4><a href={% url 'details' id=grade.innovation.id %}>{{ grade.innovation.subject }}</a>
-                            </h4>
-                        </div>
-                        <div class="col-lg-6">
-                            <button class="btn btn-sm pull-right">{{ grade.innovation.status }}</button>
-                        </div>
-                    </div>
-                </div>
+                    <a href={% url 'details' id=grade.innovation.id %}>{{ grade.innovation.subject }}</a>
+                 </div>
                 <div class="panel-body">
                     I rated this idea at <b> {{ grade.value }} </b>.
+                    <p><b>My opinion:</b>
 
-                    <h3>My opinion:</h3>
-                    {{ grade.description }}
-                </div>
-                <div class="panel-footer">
-                    {% if request.user|has_group:"administrators" %}
-                        <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
-                    {% endif %}
+                    {{ grade.description }}</p>
                 </div>
             </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
+
     </div>
 
 
