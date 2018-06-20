@@ -1,6 +1,6 @@
 from django import forms
 
-from innovations.models import Innovation, ViolationReport, Grade
+from innovations.models import Innovation, ViolationReport, Grade, InnovationComment
 
 # TODO: url i attachment powinny umożliwiać dodanie więcej niż jednego elementu
 from innovations.status_flow import available_status_choices
@@ -38,3 +38,11 @@ class WeightForm(forms.ModelForm):
     class Meta:
         model = Innovation
         fields = ['student_grade_weight', 'employee_grade_weight']
+
+
+class InnovationCommentForm(forms.ModelForm):
+    text = forms.CharField(label='')
+
+    class Meta:
+        model = InnovationComment
+        fields = ['text']

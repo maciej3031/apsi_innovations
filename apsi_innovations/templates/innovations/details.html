@@ -2,6 +2,7 @@
 {% load bootstrap_tags %}
 {% load user_tags %}
 {% block content %}
+
     {% if innovation %}
 
         {% if innovation.status == "blocked" and not request.user|has_group:"administrators" %}
@@ -100,22 +101,40 @@
 
 
         <h3>Comments:</h3>
+        <form action="{% url "innovation_comment" innovation.id %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|as_bootstrap }}
+        <button type="submit" class="btn btn-primary">Add Comment!</button>
+        </form>
+        <br/>
 
-        {% if comments %}
-
+        {% if innovation_comments %}
+            {% for comment in innovation_comments %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        {{ comment.issuer }}
+                         <p class="pull-right"><small><i>{{ comment.timestamp }}</i></small></p>
+                    </div>
+                    <div class="panel-body">
+                        {{ comment.text }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No comments yet.</p>
+        {% endif %}
+        {% if comments  %}
+        <h3>Grade history:</h3>
             {% for grade in comments %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        Ocena: {{ grade.value }}
+                        Grade: {{ grade.value }}
                     </div>
                     <div class="panel-body">
                         {{ grade.description }}
                     </div>
                 </div>
             {% endfor %}
-
-        {% else %}
-            <p>No comments.</p>
         {% endif %}
 
 
