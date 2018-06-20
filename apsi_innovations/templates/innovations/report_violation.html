@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-
+{% load bootstrap_tags %}
 {% block content %}
   <form action="" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Send message"/>
+    {{ form|as_bootstrap}}
+    <button type="submit" class="btn btn-primary">Send message</button>
   </form>
 {% endblock %}
