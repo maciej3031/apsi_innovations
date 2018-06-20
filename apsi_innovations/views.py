@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.db import transaction
 from signup.groups import administrators, in_group, committee_members, in_groups, students, employees
 from socials.models import Comment, SocialPost
-from innovations.models import Innovation, Grade
+from innovations.models import Innovation, Grade, InnovationComment
 
 
 @login_required
@@ -49,7 +49,8 @@ def student_employee_profile(request):
         "innovations": Innovation.objects.filter(issuer=request.user),
         "posts": SocialPost.objects.filter(issuer=request.user),
         "comments": Comment.objects.filter(issuer=request.user),
-        "grades": Grade.objects.filter(user=request.user)
+        "grades": Grade.objects.filter(user=request.user),
+        "innovation_comments": InnovationComment.objects.filter(issuer=request.user)
     }
     return render(request, "student_employee_profile_view.html", data)
 
