@@ -29,11 +29,12 @@
                     <div class="panel-body"><h5>{{ comment.text|linebreaksbr }}</h5></div>
                 </div>
             {% endfor %}
+            <form action="{% url "add_comment" social_post.pk %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ comment_form|as_bootstrap }}
+                <button type="submit" class="btn btn-primary">Add Comment!</button>
+            </form>
         </div>
     </div>
-    <form action="{% url "add_comment" social_post.pk %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ comment_form|as_bootstrap }}
-        <button type="submit" class="btn btn-primary">Add Comment!</button>
-    </form>
+
 {% endblock %}
