@@ -35,6 +35,9 @@ class GradeForm(forms.ModelForm):
 
 
 class WeightForm(forms.ModelForm):
+    employee_grade_weight = forms.IntegerField(max_value=5, min_value=1)
+    student_grade_weight = forms.IntegerField(max_value=5, min_value=1)
+
     class Meta:
         model = Innovation
         fields = ['student_grade_weight', 'employee_grade_weight']
