@@ -104,7 +104,7 @@ def innovation_comment(request, id):
 @login_required
 def details(request, id):
     innovation = get_object_or_404(Innovation, id=id)
-    if is_forbidden(innovation.status, request.user):
+    if is_forbidden(innovation.status, request.user) and not innovation.issuer == request.user:
         raise Http404("Page not found!")
     comments = Grade.objects.filter(innovation=innovation)
     innovation_comments = InnovationComment.objects.filter(innovation=innovation)
