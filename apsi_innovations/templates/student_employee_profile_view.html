@@ -33,7 +33,7 @@
         {% if innovation.status == "blocked" or innovation.status == "rejected" or innovation.status == "in_replenishment" %}
             <b>Status substantiation:</b> {{ innovation.status_substantiation }}
             {% if innovation.status == "in_replenishment" %}
-                <a href="../edit_innovation/{{ innovation.id }}" class="btn btn-info pull-right">Update innovation</a>
+                <a href="{% url 'edit_innovation' pk=innovation.id %}" class="btn btn-info pull-right">Update innovation</a>
             {% endif %}
         {% endif %}
     </div>
