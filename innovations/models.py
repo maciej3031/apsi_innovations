@@ -52,7 +52,8 @@ class Keyword(models.Model):
 
 
 class Grade(models.Model):
-    value = models.PositiveIntegerField(verbose_name='Grade')
+    GRADE_CHOICES = zip(range(1, 6), range(1, 6))
+    value = models.PositiveIntegerField(verbose_name='Grade', choices=GRADE_CHOICES)
     description = models.CharField(max_length=1024)
     innovation = models.ForeignKey(Innovation, related_name='grades', on_delete=models.deletion.CASCADE)
     user = models.ForeignKey(User, related_name='grades', on_delete=models.deletion.CASCADE)

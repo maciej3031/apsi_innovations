@@ -2,6 +2,7 @@
 {% load bootstrap_tags %}
 {% load user_tags %}
 {% block content %}
+{% load innovation_tags %}
 
     {% if innovation %}
 
@@ -58,9 +59,15 @@
 
 					{% endif %}
 
+                    {% if request.user|has_group:"administrators" %}
+                    <p><h4>Student grade weight:</h4>
+                    {{ innovation.student_grade_weight }} </p>
+                    <p><h4>Committee grade weight:</h4>
+                    {{ innovation.employee_grade_weight }} </p>
+                    {% endif %}
                 </div>
                 <div class="panel-footer">
-                    {% if request.user|has_group:"administrators" %}
+                    {% if request.user|has_group:"administrators" and innovation|is_processing %}
                         <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
                     {% endif %}
                     {% if innovation.status == "voting" or innovation.status == "in_replenishment" %}
