@@ -25,7 +25,6 @@ class Innovation(models.Model):
         (Status.PENDING, 'Pending'),
         (Status.VOTING, 'Voting'),
     )
-    GRADE_CHOICES = zip(range(1, 6), range(1, 6))
 
     subject = models.CharField(max_length=128)
     description = models.TextField(max_length=1024)
@@ -34,10 +33,10 @@ class Innovation(models.Model):
     costs = models.CharField(max_length=1024)
     status = models.CharField(choices=STATUS_CHOICES, max_length=32, default=Status.PENDING)
     status_substantiation = models.CharField(max_length=1024, verbose_name='Status Substantiation', null=True)
-    student_grade_weight = models.PositiveIntegerField(verbose_name="Student's Grade Weight",
-                                                       default=1.0, choices=GRADE_CHOICES)
-    employee_grade_weight = models.PositiveIntegerField(verbose_name="Employee's Grade Weight",
-                                                        default=1.0, choices=GRADE_CHOICES)
+    student_grade_weight = models.DecimalField(verbose_name="Student's Grade Weight", max_digits=3, decimal_places=2,
+                                               default=1.0)
+    employee_grade_weight = models.DecimalField(verbose_name="Employee's Grade Weight", max_digits=3, decimal_places=2,
+                                                default=1.0)
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name='Time Added')
     issuer = models.ForeignKey(User, related_name='innovations', on_delete=models.deletion.CASCADE)
 
