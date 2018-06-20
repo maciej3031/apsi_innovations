@@ -29,14 +29,16 @@ class ReportViolationForm(forms.ModelForm):
 
 
 class GradeForm(forms.ModelForm):
+    value = forms.IntegerField(max_value=5, min_value=1)
+
     class Meta:
         model = Grade
         fields = ['value', 'description']
 
 
 class WeightForm(forms.ModelForm):
-    employee_grade_weight = forms.IntegerField(max_value=5, min_value=1)
-    student_grade_weight = forms.IntegerField(max_value=5, min_value=1)
+    employee_grade_weight = forms.DecimalField(max_value=1, min_value=0, decimal_places=2)
+    student_grade_weight = forms.DecimalField(max_value=1, min_value=0, decimal_places=2)
 
     class Meta:
         model = Innovation
