@@ -15,3 +15,8 @@ def remove_page_arg(path):
     args_list = args.split("&")
     new_args_list = [arg for arg in args_list if not arg.startswith("page=")]
     return "{}?{}".format(url, "&".join(new_args_list))
+
+
+@register.filter('is_processing')
+def is_processing(innovation):
+    return innovation.status not in("rejected", "blocked")
