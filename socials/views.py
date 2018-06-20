@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.shortcuts import get_object_or_404, render
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
 
@@ -43,17 +43,19 @@ class AddCommentView(LoginRequiredMixin, CreateView):
 
     @transaction.atomic
     def form_valid(self, form):
-        social_post = get_object_or_404(SocialPost, pk=self.kwargs.get('pk'))
+        pk = self.kwargs.get('pk')
+        social_post = get_object_or_404(SocialPost, pk=pk)
         form.instance.social_post = social_post
         form.instance.issuer = self.request.user
-
+        self.success_url += str(pk)
         return super().form_valid(form)
 
 
 @login_required
-def single_social_post(request, id):
-    social_post = get_object_or_404(SocialPost, id=id)
+def single_social_post(request, pk):
+    social_post = get_object_or_404(SocialPost, id=pk)
     context = {
         'social_post': social_post,
+        'comment_form': CommentForm
     }
     return render(request, "socials/single_social_post.html", context=context)
