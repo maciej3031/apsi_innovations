@@ -2,6 +2,7 @@
 {% load bootstrap_tags %}
 {% load user_tags %}
 {% block content %}
+
     {% if innovation %}
 
         {% if innovation.status == "blocked" and not request.user|has_group:"administrators" %}
@@ -12,7 +13,15 @@
 
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    {{ innovation.subject }}
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h4><a href={% url 'details' id=innovation.id %}>{{ innovation.subject }}</a></h4>
+                        </div>
+                        <div class="col-lg-6">
+                            <button class="btn btn-sm pull-right">{{ innovation.status }}</button>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="panel-body">
                     <p><h4>Description:</h4>
@@ -28,66 +37,119 @@
 
                     <p><h4>Keywords: </h4> </p>
                     {% for keyword in innovation.keywords.all %}
-                        {{ keyword.keyword }}, 
+                        {{ keyword.keyword }}
                     {% endfor %}
+                    {% if innovation.attachments.all %}
 
-                </div>
-                <div class="panel-footer">
-					<p>
-						{% if request.user|has_group:"administrators" %}
-							<a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
-						{% endif %}
-						{% if innovation.status == "voting" or innovation.status == "in_replenishment" %}
-							{% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight %}
-								<a href="{% url 'vote' id=innovation.id %}"
-								   class="btn btn-primary">VOTE</a>
-							{% endif %}
-						{% endif %}
-						<a href="{% url 'report_violation' id=innovation.id %}" class="btn btn-primary">REPORT</a>
-						{% if request.user|has_group:"committee_members" or  request.user|has_group:"administrators" %}
-							<a href="{% url 'update_status' id=innovation.id %}">
-								<button type="submit" class="btn btn-danger pull-right">Change status</button>
-							</a>
-							{% if innovation.status == "pending" or innovation.status == "in_replenishment" %}
-								<a href="{% url 'set_status' id=innovation.id status="voting" %}">
-									<button type="submit" class="btn btn-danger pull-right">Start voting</button>
-								</a>
-							{% endif %}
-							{# TODO consider adding more fast set_status buttons. #}
-						{% endif %}
-					</p>
-					{% if innovation.attachments.all %}
-						<p>
-						<h5>Attachments:</h5>
-						</p>
+                    <p><h4>Attachments: </h4> </p>
 						<p>
 							{% for attachment in innovation.attachments.all %}
 								<a href='{{ attachment.file.url }}' class="btn btn-success">{{ attachment.filename }}</a>
 							{% endfor %}
 						</p>
 					{% endif %}
+
+                </div>
+                <div class="panel-footer">
+                    {% if request.user|has_group:"administrators" %}
+                        <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
+                    {% endif %}
+                    {% if innovation.status == "voting" or innovation.status == "in_replenishment" %}
+                        {% if request.user|has_group:"students" and innovation.student_grade_weight or request.user|has_group:"committee_members" and innovation.employee_grade_weight %}
+                            <a href="{% url 'rate' id=innovation.id %}"
+                               class="btn btn-primary">RATE</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if not request.user|has_group:"administrators" %}
+                        <a href="{% url 'report_violation' id=innovation.id %}" class="btn btn-primary">REPORT</a>
+                    {% endif %}
+
+
+                    {# ------------- ADMIN BUTTONS ---------------------#}
+                    {% if request.user|has_group:"administrators" %}
+                        {% if innovation.status != "blocked" %}
+                            <a href="{% url 'update_status' id=innovation.id %}">
+                                <button type="submit" class="btn btn-danger pull-right">Change status</button>
+                            </a>
+                        {% endif %}
+                        {% if innovation.status == "pending" or innovation.status == "in_replenishment" %}
+                            <a href="{% url 'set_status' id=innovation.id status="voting" %}">
+                                <button type="submit" class="btn btn-danger pull-right">Start voting</button>
+                            </a>
+                        {% endif %}
+                        {# TODO consider adding more fast set_status buttons. #}
+                    {% endif %}
+                </div>
+                <div class="panel-footer">
+                    {# ------------- COMMITTEE BUTTONS  / PANEL ---------------------#}
+                    {% if request.user|has_group:"committee_members" %}
+                        <div class="table-responsive">
+                            <table class="table">
+
+                                <tr>
+                                    {% for header in status_votes_table.headers %}
+                                        <td>{{ header }}</td>
+                                    {% endfor %}
+                                    <td>New substantiation</td>
+                                </tr>
+                                {% for row in status_votes_table.rows %}
+                                    <tr>
+                                        {% for value in row %}
+                                            <td>{{ value }}</td>
+                                        {% endfor %}
+                                        <td>
+                                            <form method="post" action={% url 'vote_status' id=innovation.id %}>
+                                                {% csrf_token %}
+                                                <input name="substantiation"/>
+                                                <input name="status" hidden="hidden" value={{ row.0 }}  %}>
+                                                <input type="submit" value="VOTE" class="btn btn-primary"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         {% endif %}
 
 
         <h3>Comments:</h3>
+        <form action="{% url "innovation_comment" innovation.id %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|as_bootstrap }}
+        <button type="submit" class="btn btn-primary">Add Comment!</button>
+        </form>
+        <br/>
 
-        {% if comments %}
-
+        {% if innovation_comments %}
+            {% for comment in innovation_comments %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        {{ comment.issuer }}
+                         <p class="pull-right"><small><i>{{ comment.timestamp }}</i></small></p>
+                    </div>
+                    <div class="panel-body">
+                        {{ comment.text }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No comments yet.</p>
+        {% endif %}
+        {% if comments  %}
+        <h3>Grade history:</h3>
             {% for grade in comments %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        Ocena: {{ grade.value }}
+                        Grade: {{ grade.value }}
                     </div>
                     <div class="panel-body">
                         {{ grade.description }}
                     </div>
                 </div>
             {% endfor %}
-
-        {% else %}
-            <p>No comments.</p>
         {% endif %}
 
 

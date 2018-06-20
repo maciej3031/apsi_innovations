@@ -7,9 +7,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 from django.views.generic import CreateView, UpdateView, ListView
 
-from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, StatusUpdateForm, WeightForm
-from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport
-from innovations.status_flow import try_update_status, available_status_choices
+from innovations.forms import GradeForm, ReportViolationForm, InnovationAddForm, StatusUpdateForm, WeightForm, \
+    InnovationCommentForm
+from innovations.models import Innovation, Keyword, InnovationUrl, InnovationAttachment, Grade, ViolationReport, \
+    StatusVote, InnovationComment
+from innovations.status_flow import try_update_status, available_status_choices, available_statuses, \
+    try_finish_status_voting, get_status_votes_counter, get_status_votes_table
 from signup.groups import administrators, committee_members, in_groups, students, in_group, employees
 
 
@@ -87,35 +90,70 @@ class InnovationListView(LoginRequiredMixin, ListView):
 
 
 @login_required
+def innovation_comment(request, id):
+    innovation = get_object_or_404(Innovation, id=id)
+    if request.method == 'POST':
+        form = InnovationCommentForm(data=request.POST)
+        if form.is_valid():
+            form.instance.innovation = innovation
+            form.instance.issuer = request.user
+            form.instance.save()
+        return redirect("details", id=id)
+
+
+@login_required
 def details(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if is_forbidden(innovation.status, request.user):
         raise Http404("Page not found!")
     comments = Grade.objects.filter(innovation=innovation)
+    innovation_comments = InnovationComment.objects.filter(innovation=innovation)
+    status_votes_table = get_status_votes_table(innovation)
     context = {
         'innovation': innovation,
+        'status_votes_table': status_votes_table,
         'comments': comments,
+        'innovation_comments': innovation_comments,
+        'form': InnovationCommentForm
     }
-    return render(request, "innovations/details.html", context)
+    return render(request, "innovations/details.html", context=context)
 
 
 @login_required
 @transaction.atomic
 def set_status(request, id, status):
+    if not in_group(request.user, administrators):
+        return render(request, "permission_denied.html")
     innovation = get_object_or_404(Innovation, id=id)
     try_update_status(request.user, innovation, status)
     return redirect("details", id=id)
 
 
 @login_required
-def vote(request, id):
+@transaction.atomic
+def vote_status(request, id):
+    innovation = get_object_or_404(Innovation, id=id)
+    status = request.POST.get("status")
+    substantiation = request.POST.get("substantiation")
+    if not status in available_statuses(request.user, innovation):
+        return render(request, "permission_denied.html")
+    vote, _ = StatusVote.objects.get_or_create(innovation=innovation, user=request.user)
+    vote.proposed_status = status
+    vote.substantiation = substantiation
+    vote.save()
+    try_finish_status_voting(innovation)
+    return redirect("details", id=id)
+
+
+@login_required
+def rate(request, id):
     innovation = get_object_or_404(Innovation, id=id)
     if get_previous_vote(id, request.user):
         return render(request, "voting_denied.html")
     if has_voting_access(request.user, innovation):
         if request.method == 'GET':
             form = GradeForm()
-            return render(request, "innovations/voting.html", {"form": form})
+            return render(request, "innovations/rating.html", {"form": form})
         if request.method == 'POST':
             form = GradeForm(data=request.POST)
             if form.is_valid():
@@ -153,6 +191,8 @@ def finish_violation_report(request):
 @login_required
 @transaction.atomic
 def update_status(request, id):
+    if not in_group(request.user, administrators):
+        return render(request, "permission_denied.html")
     innovation = get_object_or_404(Innovation, id=id)
     if request.method == 'GET':
         form = StatusUpdateForm()
@@ -167,6 +207,7 @@ def update_status(request, id):
                 return redirect("details", id=id)
             else:
                 return render(request, "permission_denied.html")
+    return render(request, "permission_denied.html")  # In case of strange data in form.
 
 
 @login_required
