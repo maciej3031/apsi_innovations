@@ -67,7 +67,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3>Comments I wrote: </h3>
+            <h3>Comments I wrote in inspirations: </h3>
         </div>
 
         <div class="panel-body">
@@ -81,6 +81,28 @@
                  </div>
                 <div class="panel-body">
                     {{  comment.text|linebreaksbr }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+                <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Comments I wrote in innovations: </h3>
+        </div>
+
+        <div class="panel-body">
+            {% for innovation_comment in innovation_comments %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href={% url 'details' id=innovation.id %}>See related innovation</a>
+                    <p class="pull-right">
+                    <small><i>{{ innovation_comment.timestamp }}</i></small>
+                    </p>
+                 </div>
+                <div class="panel-body">
+                    {{  innovation_comment.text|linebreaksbr }}
                 </div>
             </div>
             {% endfor %}
