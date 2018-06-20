@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load bootstrap_tags %}
+{% load user_tags %}
+{% load innovation_tags %}
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">{{ social_post.issuer }}
+            <p class="pull-right">
+                <small><i>{{ social_post.timestamp }}</i></small>
+            </p>
+        </div>
+        <div class="panel-body"><h4>{{ social_post.text|linebreaksbr }}</h4>
+            {% for attachment in social_post.attachments.all %}
+                <a href='{{ attachment.file.url }}'>{{ attachment.file }}</a><br>
+            {% endfor %}
+        </div>
+        <div class="panel-footer">
+            <h4>Comments:</h4>
+            {% for comment in social_post.comments.all %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5>{{ comment.issuer }}
+                            <p class="pull-right">
+
+                                <small><i>{{ comment.timestamp }}</i></small>
+                            </p>
+                        </h5>
+                    </div>
+                    <div class="panel-body"><h5>{{ comment.text|linebreaksbr }}</h5></div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

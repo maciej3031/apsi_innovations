@@ -65,7 +65,9 @@
         <div class="panel-body">
             {% for comment in comments %}
                 <h3>{{ comment.text }}</h3>
-                <h3>Related to post: {{ comment.social_post.id }} <-- HERE WILL BE LINK</h3>
+                <h3>Related to post:
+                    <a href="{% url 'single_social_post' id=comment.social_post.id %}">{{ comment.social_post.id }} </a>
+                </h3>
                 <hr>
             {% endfor %}
         </div>
@@ -81,7 +83,8 @@
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-lg-6">
-                            <h4><a href={% url 'details' id=grade.innovation.id %}>{{ grade.innovation.subject }}</a></h4>
+                            <h4><a href={% url 'details' id=grade.innovation.id %}>{{ grade.innovation.subject }}</a>
+                            </h4>
                         </div>
                         <div class="col-lg-6">
                             <button class="btn btn-sm pull-right">{{ grade.innovation.status }}</button>
