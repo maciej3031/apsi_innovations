@@ -29,7 +29,7 @@
 				{% endif %}
             </div>
                 <div class="panel-footer">
-			    {% if request.user|has_group:"administrators" %}
+			    {% if request.user|has_group:"administrators"  and innovation|is_processing %}
                    <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
                 {% endif %}
 		        </div>
