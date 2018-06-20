@@ -34,6 +34,30 @@
                     {{ innovation.costs }} </p>
                     <p><h4>Grade:</h4>
                     {{ innovation.grade }} </p>
+
+                    <p><h4>Keywords: </h4> </p>
+                    {% for keyword in innovation.keywords.all %}
+                        {{ keyword.keyword }}
+                    {% endfor %}
+                    {% if innovation.attachments.all %}
+
+                    <p><h4>Links:</h4></p>
+                        <p>
+                            {% for attachment in innovation.urls.all %}
+								<a href='{{ attachment.url }}'>{{ attachment.url }}</a>
+							{% endfor %}
+                        </p>
+                    <p><h4>Attachments: </h4> </p>
+						<p>
+							{% for attachment in innovation.attachments.all %}
+								<a href='{{ attachment.file.url }}' class="btn btn-success">{{ attachment.filename }}</a>
+							{% endfor %}
+						</p>
+                    <p><b><h4>Grade:</h4>
+                    {{ innovation.grade }} </b></p>
+
+					{% endif %}
+
                 </div>
                 <div class="panel-footer">
                     {% if request.user|has_group:"administrators" %}
