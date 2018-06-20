@@ -45,14 +45,7 @@ def activate_user(request):
 def student_employee_profile(request):
     if not in_groups(request.user, [students, employees]):
         return render(request, "permission_denied.html")
-    data = {
-        "innovations": Innovation.objects.filter(issuer=request.user),
-        "posts": SocialPost.objects.filter(issuer=request.user),
-        "comments": Comment.objects.filter(issuer=request.user),
-        "grades": Grade.objects.filter(user=request.user),
-        "innovation_comments": InnovationComment.objects.filter(issuer=request.user)
-    }
-    return render(request, "student_employee_profile_view.html", data)
+    return render(request, "student_employee_profile_view.html")
 
 
 @login_required

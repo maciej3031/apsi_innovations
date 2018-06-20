@@ -7,7 +7,7 @@
         <h3>Innovations I added: </h3>
     </div>
     <div class="panel-body">
-    {% for innovation in innovations %}
+    {% for innovation in request.user.innovations.all %}
         {% if innovation.status == "blocked" or innovation.status == "rejected" %}
             <div class="panel panel-danger">
         {% endif %}
@@ -48,7 +48,7 @@
             <h3>Posts I wrote: </h3>
         </div>
         <div class="panel-body">
-            {% for post in posts %}
+            {% for post in request.user.social_posts.all %}
            <div class="panel panel-default">
                 <div class="panel-heading">
                     <a href="{% url 'single_social_post' pk=post.id %}">See post </a>
@@ -71,7 +71,7 @@
         </div>
 
         <div class="panel-body">
-            {% for comment in comments %}
+            {% for comment in request.user.comments.all %}
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <a href="{% url 'single_social_post' pk=comment.social_post.id %}">See related post </a>
@@ -93,7 +93,7 @@
         </div>
 
         <div class="panel-body">
-            {% for innovation_comment in innovation_comments %}
+            {% for innovation_comment in request.user.innovation_comments.all %}
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <a href={% url 'details' id=innovation_comment.innovation.id %}>See related innovation</a>
@@ -114,7 +114,7 @@
             <h3>Feedback I gave:</h3>
         </div>
         <div class="panel-body">
-            {% for grade in grades %}
+            {% for grade in request.user.grades.all %}
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <a href={% url 'details' id=grade.innovation.id %}>{{ grade.innovation.subject }}</a>
