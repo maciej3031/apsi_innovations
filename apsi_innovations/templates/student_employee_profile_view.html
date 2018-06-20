@@ -2,73 +2,106 @@
 {% load user_tags %}
 {% load innovation_tags %}
 {% block content %}
-<div class="panel panel-default">
-			<div class ="panel-heading">
-    <h3>Innovations I added: </h3>
-            </div>
-    <div class ="panel-body">
+    <div class="panel panel-default">
+    <div class="panel-heading">
+        <h3>Innovations I added: </h3>
+    </div>
+    <div class="panel-body">
     {% for innovation in innovations %}
         {% if innovation.status == "blocked" or innovation.status == "rejected" %}
-        <div class="panel panel-danger">
-						{% endif %}
+            <div class="panel panel-danger">
+        {% endif %}
+        {% if innovation.status == "in_replenishment" %}
+            <div class="panel panel-warning">
+        {% endif %}
+        {% if innovation.status == "voting" %}
+            <div class="panel panel-info">
+        {% endif %}
+        {% if innovation.status == "accepted" %}
+            <div class="panel panel-success">
+        {% endif %}
+        {% if innovation.status == "suspended" or innovation.status == "pending" %}
+            <div class="panel panel-default">
+        {% endif %}
+    <div class="panel-heading ">
+        <a href="../innovation_details/{{ innovation.id }}/">{{ innovation.subject }} </a>
+        <p class="pull-right">Status: {{ innovation.status }}</p>
+    </div>
+    <div class="panel-body">
+        <p>{{ innovation.description }}</p>
+
+        {% if innovation.status == "blocked" or innovation.status == "rejected" or innovation.status == "in_replenishment" %}
+            <b>Status substantiation:</b> {{ innovation.status_substantiation }}
             {% if innovation.status == "in_replenishment" %}
-        <div class="panel panel-warning">
-						{% endif %}
-            {% if innovation.status == "voting" %}
-        <div class="panel panel-info">
-						{% endif %}
-            {% if innovation.status == "accepted" %}
-        <div class="panel panel-success">
-						{% endif %}
-            {% if innovation.status == "suspended" or innovation.status == "pending" %}
-        <div class="panel panel-default">
-						{% endif %}
-			<div class ="panel-heading ">
-				<a href="../innovation_details/{{innovation.id}}/">{{ innovation.subject }} </a>  <p class="pull-right">Status: {{innovation.status}}</p>
-			</div>
-			<div class ="panel-body">
-                <p>{{ innovation.description }}</p>
-
-                {% if innovation.status == "blocked" or innovation.status == "rejected" or innovation.status == "in_replenishment"%}
-                <b>Status substantiation:</b> {{ innovation.status_substantiation }}
-                 {% if innovation.status == "in_replenishment" %}
-                <a href="../edit_innovation/{{innovation.id}}" class="btn btn-info pull-right">Update innovation</a>
-                {% endif %}
-                {% endif %}
-			</div>
-		</div>
+                <a href="../edit_innovation/{{ innovation.id }}" class="btn btn-info pull-right">Update innovation</a>
+            {% endif %}
+        {% endif %}
+    </div>
+    </div>
 
     {% endfor %}
-    </div>
+</div>
 </div>
 
-<div class="panel panel-default">
-			<div class ="panel-heading">
-    <h3>Posts I wrote: </h3>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Posts I wrote: </h3>
+        </div>
+        <div class="panel-body">
+            {% for post in posts %}
+                <h3>{{ post.text }}</h3>
+                <h3>Added: {{ post.timestamp }}</h3>
+                <hr>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Comments I wrote: </h3>
+        </div>
+
+        <div class="panel-body">
+            {% for comment in comments %}
+                <h3>{{ comment.text }}</h3>
+                <h3>Related to post: {{ comment.social_post.id }} <-- HERE WILL BE LINK</h3>
+                <hr>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Feedback I gave</h3>
+        </div>
+
+        {% for grade in grades %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h4><a href={% url 'details' id=grade.innovation.id %}>{{ grade.innovation.subject }}</a></h4>
+                        </div>
+                        <div class="col-lg-6">
+                            <button class="btn btn-sm pull-right">{{ grade.innovation.status }}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    I rated this idea at <b> {{ grade.value }} </b>.
+
+                    <h3>My opinion:</h3>
+                    {{ grade.description }}
+                </div>
+                <div class="panel-footer">
+                    {% if request.user|has_group:"administrators" %}
+                        <a href="{% url 'update_weights' id=innovation.id %}" class="btn btn-primary">CHANGE WEIGHTS</a>
+                    {% endif %}
+                </div>
             </div>
-    <div class ="panel-body">
-    {% for post in posts %}
-        <h3>{{ post.text }}</h3>
-        <h3>Added: {{ post.timestamp }}</h3>
-        <hr>
-    {% endfor %}
+        {% endfor %}
     </div>
-</div>
-
-
-<div class="panel panel-default">
-			<div class ="panel-heading">
-    <h3>Comments I wrote: </h3>
-            </div>
-
-    <div class ="panel-body">
-    {% for comment in comments %}
-        <h3>{{ comment.text }}</h3>
-        <h3>Related to post: {{ comment.social_post.id }} <-- HERE WILL BE LINK</h3>
-        <hr>
-    {% endfor %}
-    </div>
-</div>
 
 
 {% endblock %}
